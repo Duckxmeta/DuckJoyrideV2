@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Duck Joyride</title>
+    <style>
+        body { margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #87CEEB; }
+        canvas { display: block; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+</head>
+<body>
+    <script>
+        // Global variables
+        const Global = {
+            baseScrollSpeed: 200.0,
+            currentScrollSpeed: 200.0
+        };
+
+        // Achievements
+        const Achievements = {
+            achievements: {
+                score_100: { unlocked: false, skin: "golden_duck", description: "Score 100: Unlock Golden Duck" },
+                score_500: { unlocked: false, skin: "cyber_duck", description: "Score 500: Unlock Cyber Duck" },
+                score_1000: { unlocked: false, skin: "rainbow_duck", description: "Score 1000: Unlock Rainbow Duck" }
+            },
+            selectedSkin: "duck",
+            loadAchievements() {
+                const savedData = localStorage.getItem("duckJoyrideAchievements");
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.achievements = data.achievements;
+                    this.selectedSkin = data.selectedSkin;
+                }
+            },
+            saveAchievements() {
+                localStorage.setItem("duckJoyrideAchievements", JSON.stringify({
+                    achievements: this.achievements,
+                    selectedSkin: this.selectedSkin
+                }));
+            },
+            checkAchievements(score) {
+                if (score >= 100 && !this.achievements.score_100.unlocked) {
+                    this.achievements.score_100.unlocked = true;
+                    this.saveAchievements();
+                }
+                if (score >= 500 && !this.achievements.score_500.unlocked) {
+                    this.achievements.score_500.unlocked = true;
+                    this.saveAchievements();
+                }
+                if (score >= 1000 && !this.achievements.score_1000.unlocked) {
+                    this.achievements.score_1000.unlocked = true;
+                    this.saveAchievements();
+                }
+            },
+            setSkin(skinName) {
+                this.selectedSkin = skinName;
+                this.saveAchievements();
+            }
+        };
+
+        // StartMenuScene
+        class StartMenuScene extends Phaser.Scene {
+            constructor() {
+                super('StartMenuScene');
+            }
+
+            create() {
+                this.cameras.main.setBackgroundColor('#87CEEB');
+                let highScore = localStorage.getItem("duckJoyrideHighScore") || 0;
+                this.add.text(400, 100, `High Score: ${highScore}`, {
+                    fontSize: '32px', color: '#000'
+                }).setOrigin(0.5);
+
+                const buttons = [
+                    { text: 'Start Game', scene: 'GameScene', y: 200 },
+                    { text: 'How to Play', scene: 'HowToPlayScene', y: 260 },
+                    { text: 'Achievements', scene: 'AchievementsScene', y: 320 },
+                    { text: 'Quit', action: () => alert('Game closed (simulated in browser)'), y: 380 }
+                ];
+
+                buttons.forEach(btn => {
+                    const button = this.add.text(400, btn.y, btn.text, {
+                        fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                    button.on('pointerdown', () => {
+                        if (btn.scene) this.scene.start(btn.scene);
+                        else btn.action();
+                    });
+                });
+            }
+        }
+
+        // HowToPlayScene
+        class HowToPlayScene extends Phaser.Scene {
+            constructor() {
+                super('HowToPlayScene');
+            }
+
+            create() {
+                this.cameras.main.setBackgroundColor('#87CEEB');
+                this.add.text(400, 100, 'How to Play', { fontSize: '32px', color: '#000' }).setOrigin(0.5);
+                this.add.text(400, 200,
+                    'Press Space or Tap to fly the duck.\n' +
+                    'Avoid rocks, birds, and balloons.\n' +
+                    'Collect peas (+1/+2), coins (+20), and power-ups.\n' +
+                    'Power-ups: Speed Boost (10s), Shield, Pea Multiplier (30s), Magnet (30s).',
+                    { fontSize: '24px', color: '#000', align: 'center' }
+                ).setOrigin(0.5);
+
+                const backButton = this.add.text(400, 400, 'Back to Menu', {
+                    fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+            }
+        }
+
+        // AchievementsScene
+        class AchievementsScene extends Phaser.Scene {
+            constructor() {
+                super('AchievementsScene');
+            }
+
+            create() {
+                this.cameras.main.setBackgroundColor('#87CEEB');
+                let y = 100;
+
+                const skins = [
+                    { name: 'duck', label: 'Original Duck (Always Available)', unlocked: true },
+                    { name: 'golden_duck', key: 'score_100' },
+                    { name: 'cyber_duck', key: 'score_500' },
+                    { name: 'rainbow_duck', key: 'score_1000' }
+                ];
+
+                skins.forEach(skin => {
+                    const isUnlocked = skin.unlocked || Achievements.achievements[skin.key]?.unlocked;
+                    const text = skin.key ? `${Achievements.achievements[skin.key].description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
+                    this.add.text(400, y, text, { fontSize: '24px', color: '#000' }).setOrigin(0.5);
+                    y += 50;
+                    const button = this.add.text(400, y, 'Select', {
+                        fontSize: '20px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: isUnlocked });
+                    button.setAlpha(isUnlocked ? 1 : 0.5);
+                    button.on('pointerdown', () => {
+                        if (isUnlocked) Achievements.setSkin(skin.name);
+                    });
+                    y += 80;
+                });
+
+                const backButton = this.add.text(400, y, 'Back to Menu', {
+                    fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+            }
+        }
+
+        // GameScene
+        class GameScene extends Phaser.Scene {
+            constructor() {
+                super('GameScene');
+            }
+
+            preload() {
+                this.load.image('sky', 'assets/sky.png');
+                this.load.image('duck', 'assets/duck.png');
+                this.load.image('golden_duck', 'assets/golden_duck.png');
+                this.load.image('cyber_duck', 'assets/cyber_duck.png');
+                this.load.image('rainbow_duck', 'assets/rainbow_duck.png');
+                this.load.image('pea', 'assets/pea.png');
+                this.load.image('coin', 'assets/coin.png');
+                this.load.image('rock', 'assets/rock.png');
+                this.load.image('bird', 'assets/bird.png');
+                this.load.image('balloon', 'assets/balloon.png');
+                this.load.image('speed_boost', 'assets/speed_boost.png');
+                this.load.image('shield', 'assets/shield.png');
+                this.load.image('pea_pod', 'assets/pea_pod.png');
+                this.load.image('magnet', 'assets/magnet.png');
+                this.load.image('shield_icon', 'assets/shield.png');
+            }
+
+            create() {
+                // Backgrounds
+                this.background1 = this.add.tileSprite(0, 0, 1152, 600, 'sky').setOrigin(0, 0);
+                this.background2 = this.add.tileSprite(1152, 0, 1152, 600, 'sky').setOrigin(0, 0);
+
+                // Player
+                this.player = this.physics.add.sprite(100, 300, Achievements.selectedSkin || 'duck')
+                    .setCollideWorldBounds(true);
+                this.player.body.setGravityY(800);
+
+                // Groups
+                this.peas = this.physics.add.group();
+                this.coins = this.physics.add.group();
+                this.rocks = this.physics.add.group();
+                this.birds = this.physics.add.group();
+                this.balloons = this.physics.add.group();
+                this.speedBoosts = this.physics.add.group();
+                this.shields = this.physics.add.group();
+                this.peaPods = this.physics.add.group();
+                this.magnets = this.physics.add.group();
+
+                // HUD
+                this.scoreLabel = this.add.text(10, 10, 'Score: 0', { fontSize: '24px', color: '#000' });
+                this.speedBoostLabel = this.add.text(10, 40, '', { fontSize: '20px', color: '#000' });
+                this.peaPodLabel = this.add.text(10, 60, '', { fontSize: '20px', color: '#000' });
+                this.magnetLabel = this.add.text(10, 80, '', { fontSize: '20px', color: '#000' });
+                this.shieldIcon = this.add.image(50, 100, 'shield_icon').setVisible(false);
+
+                // Input
+                this.cursors = this.input.keyboard.createCursorKeys();
+                this.isTouching = false;
+                this.input.on('pointerdown', () => this.isTouching = true);
+                this.input.on('pointerup', () => this.isTouching = false);
+
+                // Game state
+                this.score = 0;
+                this.gameOver = false;
+                this.speedBoostActive = false;
+                this.speedBoostTimer = 0;
+                this.isInvincible = false;
+                this.hasShield = false;
+                this.peaMultiplierActive = false;
+                this.peaMultiplierTimer = 0;
+                this.magnetActive = false;
+                this.magnetTimer = 0;
+
+                // Spawner timers
+                this.peaSpawnTimer = 0;
+                this.speedBoostSpawnTimer = 0;
+                this.shieldSpawnTimer = 30;
+                this.peaPodSpawnTimer = 15;
+                this.magnetSpawnTimer = 45;
+                this.coinSpawnTimer = 20;
+
+                // Collisions
+                this.physics.add.overlap(this.player, this.peas, this.collectPea, null, this);
+                this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this);
+                this.physics.add.overlap(this.player, this.speedBoosts, this.collectSpeedBoost, null, this);
+                this.physics.add.overlap(this.player, this.shields, this.collectShield, null, this);
+                this.physics.add.overlap(this.player, this.peaPods, this.collectPeaPod, null, this);
+                this.physics.add.overlap(this.player, this.magnets, this.collectMagnet, null, this);
+                this.physics.add.overlap(this.player, [this.rocks, this.birds, this.balloons], this.hitObstacle, null, this);
+            }
+
+            update(time, delta) {
+                const deltaSeconds = delta / 1000;
+                if (this.gameOver) return;
+
+                // Backgrounds
+                this.background1.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+                this.background2.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+
+                // Player movement
+                this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
+
+                // Power-ups
+                if (this.speedBoostActive) {
+                    this.speedBoostTimer -= deltaSeconds;
+                    if (this.speedBoostTimer <= 0) {
+                        this.speedBoostActive = false;
+                        this.isInvincible = false;
+                        Global.currentScrollSpeed = Global.baseScrollSpeed;
+                        this.speedBoostLabel.setText('');
+                    } else {
+                        this.speedBoostLabel.setText(`Speed Boost: ${Math.ceil(this.speedBoostTimer)}s`);
+                    }
+                } else {
+                    Global.currentScrollSpeed = Global.baseScrollSpeed;
+                }
+
+                if (this.peaMultiplierActive) {
+                    this.peaMultiplierTimer -= deltaSeconds;
+                    if (this.peaMultiplierTimer <= 0) {
+                        this.peaMultiplierActive = false;
+                        this.peaPodLabel.setText('');
+                    } else {
+                        this.peaPodLabel.setText(`x2 Peas: ${Math.ceil(this.peaMultiplierTimer)}s`);
+                    }
+                }
+
+                if (this.magnetActive) {
+                    this.magnetTimer -= deltaSeconds;
+                    if (this.magnetTimer <= 0) {
+                        this.magnetActive = false;
+                        this.magnetLabel.setText('');
+                    } else {
+                        this.magnetLabel.setText(`Magnet: ${Math.ceil(this.magnetTimer)}s`);
+                        this.peas.getChildren().forEach(pea => {
+                            const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, pea.x, pea.y);
+                            if (distance <= 200) {
+                                const angle = Phaser.Math.Angle.Between(pea.x, pea.y, this.player.x, this.player.y);
+                                pea.x += Math.cos(angle) * 200 * deltaSeconds;
+                                pea.y += Math.sin(angle) * 200 * deltaSeconds;
+                            }
+                        });
+                    }
+                }
+
+                this.shieldIcon.setVisible(this.hasShield);
+
+                // Move objects
+                this.peas.getChildren().forEach(pea => {
+                    pea.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (pea.x < -50) pea.destroy();
+                });
+
+                this.coins.getChildren().forEach(coin => {
+                    coin.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (coin.x < -50) coin.destroy();
+                });
+
+                this.rocks.getChildren().forEach(rock => {
+                    rock.x -= 200 * deltaSeconds;
+                    if (rock.x < -50) rock.destroy();
+                });
+
+                this.birds.getChildren().forEach(bird => {
+                    bird.x -= 300 * deltaSeconds;
+                    if (bird.x < -50) bird.destroy();
+                });
+
+                this.balloons.getChildren().forEach(balloon => {
+                    balloon.x -= 150 * deltaSeconds;
+                    if (balloon.x < -50) balloon.destroy();
+                });
+
+                this.speedBoosts.getChildren().forEach(speedBoost => {
+                    speedBoost.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (speedBoost.x < -50) speedBoost.destroy();
+                });
+
+                this.shields.getChildren().forEach(shield => {
+                    shield.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (shield.x < -50) shield.destroy();
+                });
+
+                this.peaPods.getChildren().forEach(peaPod => {
+                    peaPod.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (peaPod.x < -50) peaPod.destroy();
+                });
+
+                this.magnets.getChildren().forEach(magnet => {
+                    magnet.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (magnet.x < -50) magnet.destroy();
+                });
+
+                // Spawner
+                this.peaSpawnTimer += deltaSeconds;
+                if (this.peaSpawnTimer >= 1.5) {
+                    const peaCount = Phaser.Math.Between(3, 5);
+                    const yPos = Phaser.Math.Between(50, 598);
+                    for (let i = 0; i < peaCount; i++) {
+                        this.peas.create(1200 + i * 50, yPos, 'pea');
+                    }
+                    this.peaSpawnTimer = 0;
+                }
+
+                if (Math.random() < 0.005) {
+                    this.rocks.create(1200, Phaser.Math.Between(50, 598), 'rock');
+                }
+
+                if (Math.random() < 0.004) {
+                    this.birds.create(1200, Phaser.Math.Between(50, 598), 'bird');
+                }
+
+                if (Math.random() < 0.003) {
+                    this.balloons.create(1200, Phaser.Math.Between(50, 598), 'balloon');
+                }
+
+                this.speedBoostSpawnTimer += deltaSeconds;
+                if (this.speedBoostSpawnTimer >= 60) {
+                    this.speedBoosts.create(1200, Phaser.Math.Between(50, 598), 'speed_boost');
+                    this.speedBoostSpawnTimer = 0;
+                }
+
+                this.shieldSpawnTimer += deltaSeconds;
+                if (this.shieldSpawnTimer >= 60) {
+                    this.shields.create(1200, Phaser.Math.Between(50, 598), 'shield');
+                    this.shieldSpawnTimer = 0;
+                }
+
+                this.peaPodSpawnTimer += deltaSeconds;
+                if (this.peaPodSpawnTimer >= 60) {
+                    this.peaPods.create(1200, Phaser.Math.Between(50, 598), 'pea_pod');
+                    this.peaPodSpawnTimer = 0;
+                }
+
+                this.magnetSpawnTimer += deltaSeconds;
+                if (this.magnetSpawnTimer >= 60) {
+                    this.magnets.create(1200, Phaser.Math.Between(50, 598), 'magnet');
+                    this.magnetSpawnTimer = 0;
+                }
+
+                this.coinSpawnTimer += deltaSeconds;
+                if (this.coinSpawnTimer >= 60) {
+                    this.coins.create(1200, Phaser.Math.Between(50, 598), 'coin');
+                    this.coinSpawnTimer = 0;
+                }
+            }
+
+            collectPea(player, pea) {
+                if (this.gameOver) return;
+                this.score += this.peaMultiplierActive ? 2 : 1;
+                this.scoreLabel.setText(`Score: ${this.score}`);
+                pea.destroy();
+            }
+
+            collectCoin(player, coin) {
+                if (this.gameOver) return;
+                this.score += 20;
+                this.scoreLabel.setText(`Score: ${this.score}`);
+                coin.destroy();
+            }
+
+            collectSpeedBoost(player, speedBoost) {
+                if (this.gameOver) return;
+                this.speedBoostActive = true;
+                this.speedBoostTimer = 10;
+                this.isInvincible = true;
+                Global.currentScrollSpeed = Global.baseScrollSpeed * 2;
+                speedBoost.destroy();
+            }
+
+            collectShield(player, shield) {
+                if (this.gameOver) return;
+                this.hasShield = true;
+                shield.destroy();
+            }
+
+            collectPeaPod(player, peaPod) {
+                if (this.gameOver) return;
+                this.peaMultiplierActive = true;
+                this.peaMultiplierTimer = 30;
+                peaPod.destroy();
+            }
+
+            collectMagnet(player, magnet) {
+                if (this.gameOver) return;
+                this.magnetActive = true;
+                this.magnetTimer = 30;
+                magnet.destroy();
+            }
+
+            hitObstacle(player, obstacle) {
+                if (this.gameOver) return;
+                if (this.isInvincible) {
+                    obstacle.destroy();
+                } else if (this.hasShield) {
+                    this.hasShield = false;
+                    obstacle.destroy();
+                } else {
+                    this.gameOver = true;
+                    this.scoreLabel.setText(`Game Over! Score: ${this.score}`);
+                    let highScore = parseInt(localStorage.getItem("duckJoyrideHighScore") || 0);
+                    if (this.score > highScore) {
+                        highScore = this.score;
+                        localStorage.setItem("duckJoyrideHighScore", highScore);
+                    }
+                    Achievements.checkAchievements(this.score);
+                    this.scene.start('GameOverScene', { finalScore: this.score });
+                }
+            }
+        }
+
+        // GameOverScene
+        class GameOverScene extends Phaser.Scene {
+            constructor() {
+                super('GameOverScene');
+            }
+
+            init(data) {
+                this.finalScore = data.finalScore || 0;
+            }
+
+            create() {
+                this.cameras.main.setBackgroundColor('#87CEEB');
+                this.add.text(400, 200, `Score: ${this.finalScore}`, { fontSize: '32px', color: '#000' }).setOrigin(0.5);
+                const returnButton = this.add.text(400, 300, 'Return to Menu', {
+                    fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+            }
+        }
+
+        // Phaser config
+        const config = {
+            type: Phaser.AUTO,
+            width: 800,
+            height: 600,
+            physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+            scene: [StartMenuScene, HowToPlayScene, AchievementsScene, GameScene, GameOverScene]
+        };
+
+        // Initialize game
+        Achievements.loadAchievements();
+        const game = new Phaser.Game(config);
+    </script>
+</body>
+</html>
