@@ -20,7 +20,7 @@
         const Achievements = {
             achievements: {
                 score_100: { unlocked: false, skin: "golden_duck", description: "Score 100: Unlock Golden Duck" },
-                score_500: { unlocked: false, skin: "cyber_duck", description: "Score 500: Unlock Cyber Duck" },
+                score_500: { unlocked: false, skin: "cyber_duck", description: "Score 500: Undo Cyber Duck" },
                 score_1000: { unlocked: false, skin: "rainbow_duck", description: "Score 1000: Unlock Rainbow Duck" }
             },
             selectedSkin: "duck",
@@ -160,7 +160,7 @@
             }
 
             preload() {
-                // Load assets from the "Assets4game" folder
+                // Load assets with correct lowercase .png extensions
                 this.load.image('sky', 'Assets4game/sky.png');
                 this.load.image('duck', 'Assets4game/duck.png');
                 this.load.image('golden_duck', 'Assets4game/golden_duck.png');
@@ -176,17 +176,36 @@
                 this.load.image('pea_pod', 'Assets4game/pea_pod.png');
                 this.load.image('magnet', 'Assets4game/magnet.png');
                 this.load.image('shield_icon', 'Assets4game/shield.png');
+
+                // Log loading errors for debugging
+                this.load.on('filecomplete', (key, type, success) => {
+                    console.log(`Loaded ${key} successfully`);
+                });
+                this.load.on('loaderror', (file) => {
+                    console.error(`Failed to load ${file.key}: ${file.src}`);
+                });
             }
 
             create() {
-                // Backgrounds
-                this.background1 = this.add.tileSprite(0, 0, 1152, 600, 'sky').setOrigin(0, 0);
-                this.background2 = this.add.tileSprite(1152, 0, 1152, 600, 'sky').setOrigin(0, 0);
+                // Set a fallback background color in case sky.png fails to load
+                this.cameras.main.setBackgroundColor('#87CEEB');
+
+                // Backgrounds - Only add tileSprite if the sky texture loaded
+                if (this.textures.exists('sky')) {
+                    this.background1 = this.add.tileSprite(0, 0, 1152, 600, 'sky').setOrigin(0, 0);
+                    this.background2 = this.add.tileSprite(1152, 0, 1152, 600, 'sky').setOrigin(0, 0);
+                } else {
+                    console.warn('Sky texture not loaded, using fallback background color');
+                }
 
                 // Player
                 this.player = this.physics.add.sprite(100, 300, Achievements.selectedSkin || 'duck')
                     .setCollideWorldBounds(true);
+                this.player.setScale(0.84375);
                 this.player.body.setGravityY(800);
+                if (this.player.body) {
+                    this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
+                }
 
                 // Groups
                 this.peas = this.physics.add.group();
@@ -204,7 +223,7 @@
                 this.speedBoostLabel = this.add.text(10, 40, '', { fontSize: '20px', color: '#000' });
                 this.peaPodLabel = this.add.text(10, 60, '', { fontSize: '20px', color: '#000' });
                 this.magnetLabel = this.add.text(10, 80, '', { fontSize: '20px', color: '#000' });
-                this.shieldIcon = this.add.image(50, 100, 'shield_icon').setVisible(false);
+                this.shieldIcon = this.add.image(50, 100, 'shield_icon').setVisible(false).setScale(0.5625);
 
                 // Input
                 this.cursors = this.input.keyboard.createCursorKeys();
@@ -247,8 +266,10 @@
                 if (this.gameOver) return;
 
                 // Backgrounds
-                this.background1.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
-                this.background2.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+                if (this.background1 && this.background2) {
+                    this.background1.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+                    this.background2.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+                }
 
                 // Player movement
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
@@ -314,6 +335,7 @@
                     if (rock.x < -50) rock.destroy();
                 });
 
+
                 this.birds.getChildren().forEach(bird => {
                     bird.x -= 300 * deltaSeconds;
                     if (bird.x < -50) bird.destroy();
@@ -344,56 +366,92 @@
                     if (magnet.x < -50) magnet.destroy();
                 });
 
-                // Spawner
+                // Spawner - Apply scaling and physics setup at creation
                 this.peaSpawnTimer += deltaSeconds;
-                if (this.peaSpawnTimer >= 1.5) {
+                if (this.peaSpawnTimer >= 2) {
                     const peaCount = Phaser.Math.Between(3, 5);
-                    const yPos = Phaser.Math.Between(50, 598);
+                    const yPos = Phaser.Math.Between(50, 550);
                     for (let i = 0; i < peaCount; i++) {
-                        this.peas.create(1200 + i * 50, yPos, 'pea');
+                        const pea = this.peas.create(1200 + i * 50, yPos, 'pea');
+                        pea.setScale(0.5625);
+                        if (pea.body) {
+                            pea.body.setSize(pea.width * 0.8, pea.height * 0.8);
+                        }
                     }
                     this.peaSpawnTimer = 0;
                 }
 
                 if (Math.random() < 0.005) {
-                    this.rocks.create(1200, Phaser.Math.Between(50, 598), 'rock');
+                    const rock = this.rocks.create(1200, Phaser.Math.Between(50, 550), 'rock');
+                    rock.setScale(0.5625);
+                    if (rock.body) {
+                        rock.body.setSize(rock.width * 0.8, rock.height * 0.8);
+                    }
                 }
 
                 if (Math.random() < 0.004) {
-                    this.birds.create(1200, Phaser.Math.Between(50, 598), 'bird');
+                    const bird = this.birds.create(1200, Phaser.Math.Between(50, 550), 'bird');
+                    bird.setScale(0.5625);
+                    if (bird.body) {
+                        bird.body.setSize(bird.width * 0.8, bird.height * 0.8);
+                    }
                 }
 
                 if (Math.random() < 0.003) {
-                    this.balloons.create(1200, Phaser.Math.Between(50, 598), 'balloon');
+                    const balloon = this.balloons.create(1200, Phaser.Math.Between(50, 550), 'balloon');
+                    balloon.setScale(0.5625);
+                    if (balloon.body) {
+                        balloon.body.setSize(balloon.width * 0.8, balloon.height * 0.8);
+                    }
                 }
 
                 this.speedBoostSpawnTimer += deltaSeconds;
                 if (this.speedBoostSpawnTimer >= 60) {
-                    this.speedBoosts.create(1200, Phaser.Math.Between(50, 598), 'speed_boost');
+                    const speedBoost = this.speedBoosts.create(1200, Phaser.Math.Between(50, 550), 'speed_boost');
+                    speedBoost.setScale(0.5625);
+                    if (speedBoost.body) {
+                        speedBoost.body.setSize(speedBoost.width * 0.8, speedBoost.height * 0.8);
+                    }
                     this.speedBoostSpawnTimer = 0;
                 }
 
                 this.shieldSpawnTimer += deltaSeconds;
                 if (this.shieldSpawnTimer >= 60) {
-                    this.shields.create(1200, Phaser.Math.Between(50, 598), 'shield');
+                    const shield = this.shields.create(1200, Phaser.Math.Between(50, 550), 'shield');
+                    shield.setScale(0.5625);
+                    if (shield.body) {
+                        shield.body.setSize(shield.width * 0.8, shield.height * 0.8);
+                    }
                     this.shieldSpawnTimer = 0;
                 }
 
                 this.peaPodSpawnTimer += deltaSeconds;
                 if (this.peaPodSpawnTimer >= 60) {
-                    this.peaPods.create(1200, Phaser.Math.Between(50, 598), 'pea_pod');
+                    const peaPod = this.peaPods.create(1200, Phaser.Math.Between(50, 550), 'pea_pod');
+                    peaPod.setScale(0.5625);
+                    if (peaPod.body) {
+                        peaPod.body.setSize(peaPod.width * 0.8, peaPod.height * 0.8);
+                    }
                     this.peaPodSpawnTimer = 0;
                 }
 
                 this.magnetSpawnTimer += deltaSeconds;
                 if (this.magnetSpawnTimer >= 60) {
-                    this.magnets.create(1200, Phaser.Math.Between(50, 598), 'magnet');
+                    const magnet = this.magnets.create(1200, Phaser.Math.Between(50, 550), 'magnet');
+                    magnet.setScale(0.5625);
+                    if (magnet.body) {
+                        magnet.body.setSize(magnet.width * 0.8, magnet.height * 0.8);
+                    }
                     this.magnetSpawnTimer = 0;
                 }
 
                 this.coinSpawnTimer += deltaSeconds;
                 if (this.coinSpawnTimer >= 60) {
-                    this.coins.create(1200, Phaser.Math.Between(50, 598), 'coin');
+                    const coin = this.coins.create(1200, Phaser.Math.Between(50, 550), 'coin');
+                    coin.setScale(0.5625);
+                    if (coin.body) {
+                        coin.body.setSize(coin.width * 0.8, coin.height * 0.8);
+                    }
                     this.coinSpawnTimer = 0;
                 }
             }
@@ -488,6 +546,10 @@
             width: 800,
             height: 600,
             physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+            scale: {
+                mode: Phaser.Scale.FIT,
+                autoCenter: Phaser.Scale.CENTER_BOTH
+            },
             scene: [StartMenuScene, HowToPlayScene, AchievementsScene, GameScene, GameOverScene]
         };
 
