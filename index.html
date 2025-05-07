@@ -161,7 +161,7 @@
             }
 
             preload() {
-                this.load.image('sky', 'https://i.imgur.com/KvVD3oE.png'); // Fixed to correct sky sprite
+                this.load.image('sky', 'https://i.imgur.com/r9qCYMs.png');
                 this.load.image('duck', 'https://i.imgur.com/pfFfvR0.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
@@ -200,7 +200,7 @@
                     console.error(`Player texture '${playerSkin}' not loaded!`);
                 }
                 this.player = this.physics.add.sprite(100, 300, playerSkin).setCollideWorldBounds(true);
-                this.player.setScale(0.84375);
+                this.player.setScale(0.6328125); // Reduced from 0.84375 by 25%
                 this.player.body.setGravityY(800);
                 if (this.player.body) {
                     this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
@@ -220,7 +220,7 @@
                 this.speedBoostLabel = this.add.text(10, 40, '', { fontSize: '20px', color: '#000' });
                 this.peaPodLabel = this.add.text(10, 60, '', { fontSize: '20px', color: '#000' });
                 this.magnetLabel = this.add.text(10, 80, '', { fontSize: '20px', color: '#000' });
-                this.shieldIcon = this.add.image(50, 100, 'shield_icon').setVisible(false).setScale(0.5625);
+                this.shieldIcon = this.add.image(50, 100, 'shield_icon').setVisible(false).setScale(0.421875); // Reduced from 0.5625 by 25%
 
                 this.cursors = this.input.keyboard.createCursorKeys();
                 this.isTouching = false;
@@ -259,8 +259,8 @@
                 if (this.gameOver) return;
 
                 if (this.background1 && this.background2) {
-                    this.background1.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
-                    this.background2.tilePositionX -= Global.currentScrollSpeed * deltaSeconds;
+                    this.background1.tilePositionX += Global.currentScrollSpeed * deltaSeconds;
+                    this.background2.tilePositionX += Global.currentScrollSpeed * deltaSeconds;
                 }
 
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
@@ -360,7 +360,7 @@
                     const yPos = Phaser.Math.Between(50, 550);
                     for (let i = 0; i < peaCount; i++) {
                         const pea = this.peas.create(1200 + i * 50, yPos, 'pea');
-                        pea.setScale(0.5625);
+                        pea.setScale(0.421875); // Reduced from 0.5625 by 25%
                         if (pea.body) {
                             pea.body.setSize(pea.width * 0.8, pea.height * 0.8);
                         }
@@ -370,7 +370,7 @@
 
                 if (Math.random() < 0.005) {
                     const rock = this.rocks.create(1200, Phaser.Math.Between(50, 550), 'rock');
-                    rock.setScale(0.5625);
+                    rock.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (rock.body) {
                         rock.body.setSize(rock.width * 0.8, rock.height * 0.8);
                     }
@@ -378,7 +378,7 @@
 
                 if (Math.random() < 0.004) {
                     const bird = this.birds.create(1200, Phaser.Math.Between(50, 550), 'bird');
-                    bird.setScale(0.5625);
+                    bird.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (bird.body) {
                         bird.body.setSize(bird.width * 0.8, bird.height * 0.8);
                     }
@@ -386,7 +386,7 @@
 
                 if (Math.random() < 0.003) {
                     const balloon = this.balloons.create(1200, Phaser.Math.Between(50, 550), 'balloon');
-                    balloon.setScale(0.5625);
+                    balloon.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (balloon.body) {
                         balloon.body.setSize(balloon.width * 0.8, balloon.height * 0.8);
                     }
@@ -395,7 +395,7 @@
                 this.speedBoostSpawnTimer += deltaSeconds;
                 if (this.speedBoostSpawnTimer >= 60) {
                     const speedBoost = this.speedBoosts.create(1200, Phaser.Math.Between(50, 550), 'speed_boost');
-                    speedBoost.setScale(0.5625);
+                    speedBoost.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (speedBoost.body) {
                         speedBoost.body.setSize(speedBoost.width * 0.8, speedBoost.height * 0.8);
                     }
@@ -405,7 +405,7 @@
                 this.shieldSpawnTimer += deltaSeconds;
                 if (this.shieldSpawnTimer >= 60) {
                     const shield = this.shields.create(1200, Phaser.Math.Between(50, 550), 'shield');
-                    shield.setScale(0.5625);
+                    shield.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (shield.body) {
                         shield.body.setSize(shield.width * 0.8, shield.height * 0.8);
                     }
@@ -415,7 +415,7 @@
                 this.peaPodSpawnTimer += deltaSeconds;
                 if (this.peaPodSpawnTimer >= 60) {
                     const peaPod = this.peaPods.create(1200, Phaser.Math.Between(50, 550), 'pea_pod');
-                    peaPod.setScale(0.5625);
+                    peaPod.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (peaPod.body) {
                         peaPod.body.setSize(peaPod.width * 0.8, peaPod.height * 0.8);
                     }
@@ -425,7 +425,7 @@
                 this.magnetSpawnTimer += deltaSeconds;
                 if (this.magnetSpawnTimer >= 60) {
                     const magnet = this.magnets.create(1200, Phaser.Math.Between(50, 550), 'magnet');
-                    magnet.setScale(0.5625);
+                    magnet.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (magnet.body) {
                         magnet.body.setSize(magnet.width * 0.8, magnet.height * 0.8);
                     }
@@ -435,7 +435,7 @@
                 this.coinSpawnTimer += deltaSeconds;
                 if (this.coinSpawnTimer >= 60) {
                     const coin = this.coins.create(1200, Phaser.Math.Between(50, 550), 'coin');
-                    coin.setScale(0.5625);
+                    coin.setScale(0.421875); // Reduced from 0.5625 by 25%
                     if (coin.body) {
                         coin.body.setSize(coin.width * 0.8, coin.height * 0.8);
                     }
