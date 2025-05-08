@@ -7,9 +7,13 @@
         canvas { display: block; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="https://telegram.org/js/games.js"></script>
 </head>
 <body>
     <script>
+        // Detect if running in Telegram
+        const isTelegram = typeof TelegramGameProxy !== 'undefined';
+
         // Global variables
         const Global = {
             baseScrollSpeed: 200.0,
@@ -262,10 +266,10 @@
                 this.load.image('coin', 'https://i.imgur.com/JWNPyIs.png');
                 this.load.image('rock', 'https://i.imgur.com/aZHb2XN.png');
                 this.load.image('bird', 'https://i.imgur.com/hnrVw4d.png');
-                this.load.image('star', 'https://i.imgur.com/JWNPyIs.png'); // Placeholder for star
-                this.load.image('hat', 'https://i.imgur.com/JWNPyIs.png'); // Placeholder for hat
-                this.load.image('glasses', 'https://i.imgur.com/JWNPyIs.png'); // Placeholder for glasses
-                this.load.image('particle', 'https://i.imgur.com/An0FCpc.png'); // Placeholder for particle (using pea sprite)
+                this.load.image('star', 'https://i.imgur.com/JWNPyIs.png');
+                this.load.image('hat', 'https://i.imgur.com/JWNPyIs.png');
+                this.load.image('glasses', 'https://i.imgur.com/JWNPyIs.png');
+                this.load.image('particle', 'https://i.imgur.com/An0FCpc.png');
 
                 this.load.on('filecomplete', (key, type, success) => {
                     console.log(`Loaded ${key} successfully`);
@@ -296,13 +300,12 @@
                     this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
                 }
 
-                // Add accessory to duck
                 this.accessorySprite = null;
                 const selectedAccessory = Achievements.selectedAccessory;
                 if (selectedAccessory) {
                     this.accessorySprite = this.add.sprite(this.player.x, this.player.y, selectedAccessory)
-                        .setScale(0.3) // Small scale to fit on duck
-                        .setDepth(101); // Above the player
+                        .setScale(0.3)
+                        .setDepth(101);
                 }
 
                 this.peas = this.physics.add.group();
@@ -318,7 +321,6 @@
                 this.peaPods = this.physics.add.group();
                 this.magnets = this.physics.add.group();
 
-                // HUD
                 this.scoreLabel = this.add.text(10, 10, 'Score: 0', { fontSize: '24px', color: '#000' });
                 this.levelLabel = this.add.text(10, 30, 'Level: 1', { fontSize: '20px', color: '#000' });
                 this.comboLabel = this.add.text(10, 50, 'Combo: 0', { fontSize: '20px', color: '#000' });
@@ -327,10 +329,9 @@
                 this.magnetLabel = this.add.text(10, 110, '', { fontSize: '20px', color: '#000' });
                 this.shieldIcon = this.add.image(50, 130, 'shield_icon').setVisible(false).setScale(0.421875);
 
-                // Progress Bar (moved to right side)
                 this.progressBar = this.add.graphics();
                 this.progressBar.fillStyle(0x000000, 1);
-                this.progressBar.fillRect(580, 10, 200, 20); // Moved to x: 580
+                this.progressBar.fillRect(580, 10, 200, 20);
                 this.progressBar.lineStyle(2, 0xffffff, 1);
                 this.progressBar.strokeRect(580, 10, 200, 20);
                 this.progressFill = this.add.graphics();
@@ -366,7 +367,6 @@
                 this.magnetSpawnTimer = 45;
                 this.coinSpawnTimer = 20;
 
-                // Particle effects
                 this.powerUpParticles = this.add.particles('particle');
                 this.powerUpEmitter = this.powerUpParticles.createEmitter({
                     speed: { min: 50, max: 100 },
@@ -418,12 +418,10 @@
                     this.background2.tilePositionX += Global.currentScrollSpeed * deltaSeconds;
                 }
 
-                // Update accessory position to follow player
                 if (this.accessorySprite) {
-                    this.accessorySprite.setPosition(this.player.x, this.player.y - 20); // Position above the duck
+                    this.accessorySprite.setPosition(this.player.x, this.player.y - 20);
                 }
 
-                // Day/Night Cycle
                 this.dayNightTimer += deltaSeconds;
                 if (this.dayNightTimer >= 30) {
                     this.isNight = !this.isNight;
@@ -482,11 +480,10 @@
 
                 this.shieldIcon.setVisible(this.hasShield);
 
-                // Update progress bar (moved to right side)
                 this.progressFill.clear();
                 const progress = Math.min(this.score / this.pointsToNextLevel, 1);
                 this.progressFill.fillStyle(0x00ff00, 1);
-                this.progressFill.fillRect(580, 10, 200 * progress, 20); // Moved to x: 580
+                this.progressFill.fillRect(580, 10, 200 * progress, 20);
 
                 this.peas.getChildren().forEach(pea => {
                     pea.x -= Global.currentScrollSpeed * deltaSeconds;
@@ -837,10 +834,20 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 this.add.text(400, 200, `Score: ${this.finalScore}`, { fontSize: '32px', color: '#000' }).setOrigin(0.5);
+
                 const returnButton = this.add.text(400, 300, 'Return to Menu', {
                     fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true });
                 returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+
+                if (isTelegram) {
+                    const shareButton = this.add.text(400, 360, 'Share Score', {
+                        fontSize: '24px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+                    shareButton.on('pointerdown', () => {
+                        TelegramGameProxy.shareScore();
+                    });
+                }
             }
         }
 
@@ -851,7 +858,7 @@
             height: 600,
             physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
             scale: {
-                mode: Phaser.Scale.FIT,
+                mode: Phaser.Scale.RESIZE,
                 autoCenter: Phaser.Scale.CENTER_BOTH
             },
             scene: [StartMenuScene, HowToPlayScene, AchievementsScene, AccessoriesScene, LeaderboardScene, GameScene, GameOverScene]
@@ -860,6 +867,11 @@
         // Initialize game
         Achievements.loadAchievements();
         const game = new Phaser.Game(config);
+
+        // Start directly in GameScene if running in Telegram
+        if (isTelegram) {
+            game.scene.start('GameScene');
+        }
     </script>
 </body>
 </html>
