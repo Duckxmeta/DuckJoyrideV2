@@ -191,14 +191,12 @@
                 const sf = this.scaleFactor();
                 this.add.text(200, 30, 'Leaderboard - Top 5', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
 
-                const scores = JSON.parse(localStorage.getItem('duckJoyrideLeaderboard') || '[]');
-                let y = 80;
-                scores.slice(0, 5).forEach((score, index) => {
-                    this.add.text(200, y, `${index + 1}. ${score}`, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                    y += 30;
-                });
+                // Instruct user to use /leaderboard command in Telegram
+                this.add.text(200, 80, 'Check the leaderboard by\nusing /leaderboard\nin Telegram chat!', {
+                    fontSize: '12px', color: '#000', align: 'center'
+                }).setOrigin(0.5).setScale(sf);
 
-                const backButton = this.add.text(200, 250, 'Back to Menu', {
+                const backButton = this.add.text(200, 200, 'Back to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
@@ -764,6 +762,9 @@
                     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                     shareButton.on('pointerdown', () => {
                         TelegramGameProxy.shareScore();
+                        this.add.text(200, 300, 'Score shared! Use /leaderboard\nin Telegram to see rankings.', {
+                            fontSize: '12px', color: '#000', align: 'center'
+                        }).setOrigin(0.5).setScale(sf);
                     });
                 }
             }
