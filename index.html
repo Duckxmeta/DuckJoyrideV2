@@ -72,20 +72,20 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 let highScore = localStorage.getItem("duckJoyrideHighScore") || 0;
-                this.add.text(200, 100, `High Score: ${highScore}`, {
+                this.add.text(180, 80, `High Score: ${highScore}`, {
                     fontSize: '16px', color: '#000'
                 }).setOrigin(0.5).setScale(this.scaleFactor());
 
                 const buttons = [
-                    { text: 'Start Game', scene: 'GameScene', y: 150 },
-                    { text: 'How to Play', scene: 'HowToPlayScene', y: 200 },
-                    { text: 'Achievements', scene: 'AchievementsScene', y: 250 },
-                    { text: 'Leaderboard', scene: 'LeaderboardScene', y: 300 },
-                    { text: 'Quit', action: () => alert('Game closed (simulated in browser)'), y: 350 }
+                    { text: 'Start Game', scene: 'GameScene', y: 120 },
+                    { text: 'How to Play', scene: 'HowToPlayScene', y: 160 },
+                    { text: 'Achievements', scene: 'AchievementsScene', y: 200 },
+                    { text: 'Leaderboard', scene: 'LeaderboardScene', y: 240 },
+                    { text: 'Quit', action: () => alert('Game closed (simulated in browser)'), y: 280 }
                 ];
 
                 buttons.forEach(btn => {
-                    const button = this.add.text(200, btn.y, btn.text, {
+                    const button = this.add.text(180, btn.y, btn.text, {
                         fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(this.scaleFactor());
                     button.on('pointerdown', () => {
@@ -96,7 +96,7 @@
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
         }
 
@@ -109,8 +109,8 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(200, 50, 'How to Play', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                this.add.text(200, 150,
+                this.add.text(180, 40, 'How to Play', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                this.add.text(180, 120,
                     'Tap screen or press Space to fly.\n' +
                     'Avoid rocks, birds, and balloons.\n' +
                     'Collect peas (+1/+2), coins (+20),\n' +
@@ -118,18 +118,19 @@
                     'Power-ups: Speed Boost (10s),\n' +
                     'Shield, Pea Multiplier (30s),\n' +
                     'Magnet (30s).\n' +
+                    'Points are doubled at night!\n' +
                     'Reach 100 points to level up.',
                     { fontSize: '12px', color: '#000', align: 'center' }
                 ).setOrigin(0.5).setScale(sf);
 
-                const backButton = this.add.text(200, 350, 'Back to Menu', {
+                const backButton = this.add.text(180, 280, 'Back to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
         }
 
@@ -142,10 +143,10 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                let y = 30;
+                let y = 24;
 
-                this.add.text(200, y, 'Skins', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                y += 30;
+                this.add.text(180, y, 'Skins', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                y += 24;
 
                 const skins = [
                     { name: 'duck', label: 'Duck', unlocked: true },
@@ -157,26 +158,26 @@
                 skins.forEach(skin => {
                     const isUnlocked = skin.unlocked || Achievements.achievements[skin.key]?.unlocked;
                     const text = skin.key ? `${Achievements.achievements[skin.key].description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
-                    this.add.text(200, y, text, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                    y += 30;
-                    const button = this.add.text(200, y, 'Select', {
+                    this.add.text(180, y, text, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                    y += 24;
+                    const button = this.add.text(180, y, 'Select', {
                         fontSize: '12px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                     }).setOrigin(0.5).setInteractive({ useHandCursor: isUnlocked }).setScale(sf);
                     button.setAlpha(isUnlocked ? 1 : 0.5);
                     button.on('pointerdown', () => {
                         if (isUnlocked) Achievements.setSkin(skin.name);
                     });
-                    y += 40;
+                    y += 32;
                 });
 
-                const backButton = this.add.text(200, y, 'Back to Menu', {
+                const backButton = this.add.text(180, y, 'Back to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
         }
 
@@ -189,21 +190,36 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(200, 30, 'Leaderboard - Top 5', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                this.add.text(180, 24, 'Leaderboard - Top 5', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
 
-                // Instruct user to use /leaderboard command in Telegram
-                this.add.text(200, 80, 'Check the leaderboard by\nusing /leaderboard\nin Telegram chat!', {
+                if (!isTelegram) {
+                    this.add.text(180, 64, 'Leaderboards are only\navailable in Telegram!', {
+                        fontSize: '12px', color: '#000', align: 'center'
+                    }).setOrigin(0.5).setScale(sf);
+
+                    const backButton = this.add.text(180, 160, 'Back to Menu', {
+                        fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                    backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+                    return;
+                }
+
+                // Display a loading message while fetching the leaderboard
+                this.leaderboardText = this.add.text(180, 64, 'Loading leaderboard...', {
                     fontSize: '12px', color: '#000', align: 'center'
                 }).setOrigin(0.5).setScale(sf);
 
-                const backButton = this.add.text(200, 200, 'Back to Menu', {
+                const backButton = this.add.text(180, 200, 'Back to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+
+                // Request the leaderboard from the bot
+                TelegramGameProxy.requestLeaderboard();
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
         }
 
@@ -248,8 +264,8 @@
                 const sf = this.scaleFactor();
 
                 if (this.textures.exists('sky')) {
-                    this.background1 = this.add.tileSprite(0, 0, 576, 600, 'sky').setOrigin(0, 0);
-                    this.background2 = this.add.tileSprite(576, 0, 576, 600, 'sky').setOrigin(0, 0);
+                    this.background1 = this.add.tileSprite(0, 0, 576, 640, 'sky').setOrigin(0, 0);
+                    this.background2 = this.add.tileSprite(576, 0, 576, 640, 'sky').setOrigin(0, 0);
                 } else {
                     console.warn('Sky texture not loaded, using fallback background color');
                 }
@@ -258,7 +274,7 @@
                 if (!this.textures.exists(playerSkin)) {
                     console.error(`Player texture '${playerSkin}' not loaded!`);
                 }
-                this.player = this.physics.add.sprite(50, 300, playerSkin).setCollideWorldBounds(true);
+                this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
                 this.player.setScale(0.5 * sf);
                 this.player.body.setGravityY(800);
                 if (this.player.body) {
@@ -276,19 +292,19 @@
                 this.peaPods = this.physics.add.group();
                 this.magnets = this.physics.add.group();
 
-                this.scoreLabel = this.add.text(10, 10, 'Score: 0', { fontSize: '16px', color: '#000' }).setScale(sf);
-                this.levelLabel = this.add.text(10, 30, 'Level: 1', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.comboLabel = this.add.text(10, 50, 'Combo: 0', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.speedBoostLabel = this.add.text(10, 70, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.peaPodLabel = this.add.text(10, 90, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.magnetLabel = this.add.text(10, 110, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.shieldIcon = this.add.image(30, 130, 'shield_icon').setVisible(false).setScale(0.3 * sf);
+                this.scoreLabel = this.add.text(8, 8, 'Score: 0', { fontSize: '16px', color: '#000' }).setScale(sf);
+                this.levelLabel = this.add.text(8, 24, 'Level: 1', { fontSize: '14px', color: '#000' }).setScale(sf);
+                this.comboLabel = this.add.text(8, 40, 'Combo: 0', { fontSize: '14px', color: '#000' }).setScale(sf);
+                this.speedBoostLabel = this.add.text(8, 56, '', { fontSize: '14px', color: '#000' }).setScale(sf);
+                this.peaPodLabel = this.add.text(8, 72, '', { fontSize: '14px', color: '#000' }).setScale(sf);
+                this.magnetLabel = this.add.text(8, 88, '', { fontSize: '14px', color: '#000' }).setScale(sf);
+                this.shieldIcon = this.add.image(24, 104, 'shield_icon').setVisible(false).setScale(0.3 * sf);
 
                 this.progressBar = this.add.graphics();
                 this.progressBar.fillStyle(0x000000, 1);
-                this.progressBar.fillRect(150, 10, 100, 10);
+                this.progressBar.fillRect(135, 8, 90, 8);
                 this.progressBar.lineStyle(2, 0xffffff, 1);
-                this.progressBar.strokeRect(150, 10, 100, 10);
+                this.progressBar.strokeRect(135, 8, 90, 8);
                 this.progressFill = this.add.graphics();
 
                 this.cursors = this.input.keyboard.createCursorKeys();
@@ -297,7 +313,7 @@
                 this.input.on('pointerup', () => this.isTouching = false);
 
                 if (isTelegram) {
-                    this.touchArea = this.add.rectangle(200, 500, 200, 100, 0x000000, 0.1).setInteractive();
+                    this.touchArea = this.add.rectangle(180, 560, 180, 80, 0x000000, 0.1).setInteractive();
                     this.touchArea.on('pointerdown', () => {
                         this.isTouching = true;
                     });
@@ -440,7 +456,7 @@
                 const progress = Math.min(this.score / this.pointsToNextLevel, 1);
                 this.progressFill.clear();
                 this.progressFill.fillStyle(0x00ff00, 1);
-                this.progressFill.fillRect(150, 10, 100 * progress, 10);
+                this.progressFill.fillRect(135, 8, 90 * progress, 8);
 
                 this.peas.getChildren().forEach(pea => {
                     pea.x -= Global.currentScrollSpeed * deltaSeconds;
@@ -495,9 +511,9 @@
                 this.peaSpawnTimer += deltaSeconds;
                 if (this.peaSpawnTimer >= 1.5) {
                     const peaCount = Phaser.Math.Between(2, 4);
-                    const yPos = Phaser.Math.Between(50, 550);
+                    const yPos = Phaser.Math.Between(45, 595);
                     for (let i = 0; i < peaCount; i++) {
-                        const pea = this.peas.create(600 + i * 50, yPos, 'pea');
+                        const pea = this.peas.create(540 + i * 45, yPos, 'pea');
                         pea.setScale(0.3 * this.scaleFactor());
                         if (pea.body) {
                             pea.body.setSize(pea.width * 0.8, pea.height * 0.8);
@@ -509,7 +525,7 @@
                 if (this.isNight) {
                     this.starSpawnTimer += deltaSeconds;
                     if (this.starSpawnTimer >= 10) {
-                        const star = this.stars.create(600, Phaser.Math.Between(50, 550), 'star');
+                        const star = this.stars.create(540, Phaser.Math.Between(45, 595), 'star');
                         star.setScale(0.3 * this.scaleFactor());
                         if (star.body) {
                             star.body.setSize(star.width * 0.8, star.height * 0.8);
@@ -520,7 +536,7 @@
 
                 const obstacleSpawnRate = 0.003 + (this.level - 1) * 0.0005;
                 if (Math.random() < obstacleSpawnRate) {
-                    const rock = this.rocks.create(600, Phaser.Math.Between(50, 550), 'rock');
+                    const rock = this.rocks.create(540, Phaser.Math.Between(45, 595), 'rock');
                     rock.setScale(0.3 * this.scaleFactor());
                     if (rock.body) {
                         rock.body.setSize(rock.width * 0.8, rock.height * 0.8);
@@ -528,7 +544,7 @@
                 }
 
                 if (Math.random() < obstacleSpawnRate) {
-                    const bird = this.birds.create(600, Phaser.Math.Between(50, 550), 'bird');
+                    const bird = this.birds.create(540, Phaser.Math.Between(45, 595), 'bird');
                     bird.setScale(0.3 * this.scaleFactor());
                     if (bird.body) {
                         bird.body.setSize(bird.width * 0.8, bird.height * 0.8);
@@ -536,7 +552,7 @@
                 }
 
                 if (Math.random() < obstacleSpawnRate) {
-                    const balloon = this.balloons.create(600, Phaser.Math.Between(50, 550), 'balloon');
+                    const balloon = this.balloons.create(540, Phaser.Math.Between(45, 595), 'balloon');
                     balloon.setScale(0.3 * this.scaleFactor());
                     if (balloon.body) {
                         balloon.body.setSize(balloon.width * 0.8, balloon.height * 0.8);
@@ -546,7 +562,7 @@
                 const powerUpSpawnDelay = 60 * (1 + (this.level - 1) * 0.2);
                 this.speedBoostSpawnTimer += deltaSeconds;
                 if (this.speedBoostSpawnTimer >= powerUpSpawnDelay) {
-                    const speedBoost = this.speedBoosts.create(600, Phaser.Math.Between(50, 550), 'speed_boost');
+                    const speedBoost = this.speedBoosts.create(540, Phaser.Math.Between(45, 595), 'speed_boost');
                     speedBoost.setScale(0.3 * this.scaleFactor());
                     if (speedBoost.body) {
                         speedBoost.body.setSize(speedBoost.width * 0.8, speedBoost.height * 0.8);
@@ -556,7 +572,7 @@
 
                 this.shieldSpawnTimer += deltaSeconds;
                 if (this.shieldSpawnTimer >= powerUpSpawnDelay) {
-                    const shield = this.shields.create(600, Phaser.Math.Between(50, 550), 'shield');
+                    const shield = this.shields.create(540, Phaser.Math.Between(45, 595), 'shield');
                     shield.setScale(0.3 * this.scaleFactor());
                     if (shield.body) {
                         shield.body.setSize(shield.width * 0.8, shield.height * 0.8);
@@ -566,7 +582,7 @@
 
                 this.peaPodSpawnTimer += deltaSeconds;
                 if (this.peaPodSpawnTimer >= powerUpSpawnDelay) {
-                    const peaPod = this.peaPods.create(600, Phaser.Math.Between(50, 550), 'pea_pod');
+                    const peaPod = this.peaPods.create(540, Phaser.Math.Between(45, 595), 'pea_pod');
                     peaPod.setScale(0.3 * this.scaleFactor());
                     if (peaPod.body) {
                         peaPod.body.setSize(peaPod.width * 0.8, peaPod.height * 0.8);
@@ -576,7 +592,7 @@
 
                 this.magnetSpawnTimer += deltaSeconds;
                 if (this.magnetSpawnTimer >= powerUpSpawnDelay) {
-                    const magnet = this.magnets.create(600, Phaser.Math.Between(50, 550), 'magnet');
+                    const magnet = this.magnets.create(540, Phaser.Math.Between(45, 595), 'magnet');
                     magnet.setScale(0.3 * this.scaleFactor());
                     if (magnet.body) {
                         magnet.body.setSize(magnet.width * 0.8, magnet.height * 0.8);
@@ -586,7 +602,7 @@
 
                 this.coinSpawnTimer += deltaSeconds;
                 if (this.coinSpawnTimer >= 60) {
-                    const coin = this.coins.create(600, Phaser.Math.Between(50, 550), 'coin');
+                    const coin = this.coins.create(540, Phaser.Math.Between(45, 595), 'coin');
                     coin.setScale(0.3 * this.scaleFactor());
                     if (coin.body) {
                         coin.body.setSize(coin.width * 0.8, coin.height * 0.8);
@@ -600,7 +616,7 @@
                     this.level++;
                     this.pointsToNextLevel += 100 * this.level;
                     this.levelLabel.setText(`Level: ${this.level}`);
-                    const levelUpText = this.add.text(200, 300, 'Level Up!', { fontSize: '16px', color: '#ff0' })
+                    const levelUpText = this.add.text(180, 320, 'Level Up!', { fontSize: '16px', color: '#ff0' })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -614,11 +630,13 @@
                 if (this.gameOver) return;
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
-                this.score += (this.peaMultiplierActive ? 2 : 1) * multiplier;
+                let basePoints = (this.peaMultiplierActive ? 2 : 1) * multiplier;
+                if (this.isNight) basePoints *= 2; // Double points at night
+                this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 30, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -634,11 +652,13 @@
                 if (this.gameOver) return;
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
-                this.score += 20 * multiplier;
+                let basePoints = 20 * multiplier;
+                if (this.isNight) basePoints *= 2; // Double points at night
+                this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 30, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -654,11 +674,13 @@
                 if (this.gameOver) return;
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
-                this.score += 50 * multiplier;
+                let basePoints = 50 * multiplier;
+                if (this.isNight) basePoints *= 2; // Double points at night
+                this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 30, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -732,7 +754,7 @@
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
         }
 
@@ -749,20 +771,20 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(200, 150, `Score: ${this.finalScore}`, { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                this.add.text(180, 120, `Score: ${this.finalScore}`, { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
 
-                const returnButton = this.add.text(200, 200, 'Return to Menu', {
+                const returnButton = this.add.text(180, 160, 'Return to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
 
                 if (isTelegram) {
-                    const shareButton = this.add.text(200, 250, 'Share Score', {
+                    const shareButton = this.add.text(180, 200, 'Share Score', {
                         fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                     shareButton.on('pointerdown', () => {
                         TelegramGameProxy.shareScore();
-                        this.add.text(200, 300, 'Score shared! Use /leaderboard\nin Telegram to see rankings.', {
+                        this.add.text(180, 240, 'Score shared! Use /leaderboard\nin Telegram to see rankings.', {
                             fontSize: '12px', color: '#000', align: 'center'
                         }).setOrigin(0.5).setScale(sf);
                     });
@@ -770,15 +792,34 @@
             }
 
             scaleFactor() {
-                return Math.min(this.game.config.width / 400, this.game.config.height / 600);
+                return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
+        }
+
+        // Extend TelegramGameProxy for leaderboard request
+        if (isTelegram) {
+            TelegramGameProxy.requestLeaderboard = function() {
+                TelegramGameProxy.postEvent('request_leaderboard');
+            };
+
+            TelegramGameProxy.onEvent('receive_leaderboard', (data) => {
+                const leaderboard = data.leaderboard || [];
+                const scene = game.scene.getScene('LeaderboardScene');
+                if (scene && scene.scene.isActive()) {
+                    let leaderboardText = 'No scores yet!';
+                    if (leaderboard.length > 0) {
+                        leaderboardText = leaderboard.map((entry, index) => `${index + 1}. @${entry.username}: ${entry.score}`).join('\n');
+                    }
+                    scene.leaderboardText.setText(leaderboardText);
+                }
+            });
         }
 
         // Phaser config
         const config = {
             type: Phaser.AUTO,
-            width: 400,
-            height: 600,
+            width: 360,
+            height: 640,
             physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
             scale: {
                 mode: Phaser.Scale.FIT,
