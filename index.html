@@ -231,7 +231,7 @@
             }
 
             preload() {
-                this.load.image('sky', 'https://i.imgur.com/r9qCYMs.png');
+                this.load.image('sky', 'https://i.imgur.com/hU7gyqk.jpeg');
                 this.load.image('duck', 'https://i.imgur.com/pfFfvR0.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
@@ -268,8 +268,8 @@
                 const sf = this.scaleFactor();
 
                 if (this.textures.exists('sky')) {
-                    this.background1 = this.add.tileSprite(0, 0, 576, 640, 'sky').setOrigin(0, 0);
-                    this.background2 = this.add.tileSprite(576, 0, 576, 640, 'sky').setOrigin(0, 0);
+                    this.background = this.add.sprite(this.game.config.width / 2, this.game.config.height / 2, 'sky');
+                    this.background.setDisplaySize(this.game.config.width, this.game.config.height);
                 } else {
                     console.warn('Sky texture not loaded, using fallback background color');
                 }
@@ -400,11 +400,6 @@
             update(time, delta) {
                 const deltaSeconds = delta / 1000;
                 if (this.gameOver) return;
-
-                if (this.background1 && this.background2) {
-                    this.background1.tilePositionX += Global.currentScrollSpeed * deltaSeconds;
-                    this.background2.tilePositionX += Global.currentScrollSpeed * deltaSeconds;
-                }
 
                 this.dayNightTimer += deltaSeconds;
                 if (this.dayNightTimer >= 30) {
