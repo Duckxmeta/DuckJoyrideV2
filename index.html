@@ -23,19 +23,26 @@
         // Achievements
         const Achievements = {
             achievements: {
-                score_100: { unlocked: false, skin: "golden_duck", description: "Score 100: Unlock Golden Duck" },
-                score_500: { unlocked: false, skin: "cyber_duck", description: "Score 500: Unlock Cyber Duck" },
-                score_1000: { unlocked: false, skin: "rainbow_duck", description: "Score 1000: Unlock Rainbow Duck" }
+                score_100: { unlocked: true, skin: "golden_duck", description: "Score 100: Unlock Golden Duck" },
+                score_500: { unlocked: true, skin: "cyber_duck", description: "Score 500: Unlock Cyber Duck" },
+                score_1000: { unlocked: true, skin: "rainbow_duck", description: "Score 1000: Unlock Rainbow Duck" },
+                fire_duck: { unlocked: true, skin: "fire_duck", description: "Fire Duck: Unlocked Now!" },
+                ice_duck: { unlocked: true, skin: "ice_duck", description: "Ice Duck: Unlocked Now!" },
+                toxic_duck: { unlocked: true, skin: "toxic_duck", description: "Toxic Duck: Unlocked Now!" }
             },
             selectedSkin: "duck",
             loadAchievements() {
                 const savedData = localStorage.getItem("duckJoyrideAchievements");
                 if (savedData) {
                     const data = JSON.parse(savedData);
-                    this.achievements = data.achievements;
-                    const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck'];
-                    this.selectedSkin = validSkins.includes(data.selectedSkin) ? data.selectedSkin : 'duck';
+                    // Merge saved data with default achievements, ensuring new skins are included
+                    this.achievements = { ...this.achievements, ...data.achievements };
+                } else {
+                    // If no saved data, use default achievements
+                    this.saveAchievements();
                 }
+                const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck'];
+                this.selectedSkin = validSkins.includes(this.selectedSkin) ? this.selectedSkin : 'duck';
             },
             saveAchievements() {
                 localStorage.setItem("duckJoyrideAchievements", JSON.stringify({
@@ -152,12 +159,16 @@
                     { name: 'duck', label: 'Duck', unlocked: true },
                     { name: 'golden_duck', key: 'score_100' },
                     { name: 'cyber_duck', key: 'score_500' },
-                    { name: 'rainbow_duck', key: 'score_1000' }
+                    { name: 'rainbow_duck', key: 'score_1000' },
+                    { name: 'fire_duck', key: 'fire_duck' },
+                    { name: 'ice_duck', key: 'ice_duck' },
+                    { name: 'toxic_duck', key: 'toxic_duck' }
                 ];
 
                 skins.forEach(skin => {
-                    const isUnlocked = skin.unlocked || Achievements.achievements[skin.key]?.unlocked;
-                    const text = skin.key ? `${Achievements.achievements[skin.key].description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
+                    const achievement = skin.key ? Achievements.achievements[skin.key] : null;
+                    const isUnlocked = skin.unlocked || (achievement ? achievement.unlocked : false);
+                    const text = achievement ? `${achievement.description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
                     this.add.text(180, y, text, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
                     y += 24;
                     const button = this.add.text(180, y, 'Select', {
@@ -196,26 +207,16 @@
                     this.add.text(180, 64, 'Leaderboards are only\navailable in Telegram!', {
                         fontSize: '12px', color: '#000', align: 'center'
                     }).setOrigin(0.5).setScale(sf);
-
-                    const backButton = this.add.text(180, 160, 'Back to Menu', {
-                        fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
-                    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                    backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
-                    return;
+                } else {
+                    this.add.text(180, 64, 'Check the leaderboard by\nusing /leaderboard\nin Telegram chat!', {
+                        fontSize: '12px', color: '#000', align: 'center'
+                    }).setOrigin(0.5).setScale(sf);
                 }
 
-                // Display a loading message while fetching the leaderboard
-                this.leaderboardText = this.add.text(180, 64, 'Loading leaderboard...', {
-                    fontSize: '12px', color: '#000', align: 'center'
-                }).setOrigin(0.5).setScale(sf);
-
-                const backButton = this.add.text(180, 200, 'Back to Menu', {
+                const backButton = this.add.text(180, 160, 'Back to Menu', {
                     fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
-
-                // Request the leaderboard from the bot
-                TelegramGameProxy.requestLeaderboard();
             }
 
             scaleFactor() {
@@ -235,6 +236,9 @@
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
                 this.load.image('rainbow_duck', 'https://i.imgur.com/yz3RYaz.png');
+                this.load.image('fire_duck', 'https://i.imgur.com/HWEElmk.png');
+                this.load.image('ice_duck', 'https://i.imgur.com/Xt85ys5.png');
+                this.load.image('toxic_duck', 'https://i.imgur.com/suaE0NI.png');
                 this.load.image('balloon', 'https://i.imgur.com/IWsLcKq.png');
                 this.load.image('speed_boost', 'https://i.imgur.com/DP9TnzK.png');
                 this.load.image('shield', 'https://i.imgur.com/QHL5YjX.png');
@@ -270,12 +274,19 @@
                     console.warn('Sky texture not loaded, using fallback background color');
                 }
 
-                const playerSkin = Achievements.selectedSkin || 'duck';
+                let playerSkin = Achievements.selectedSkin || 'duck';
+                // Fallback to 'duck' if the selected skin texture is not loaded
                 if (!this.textures.exists(playerSkin)) {
-                    console.error(`Player texture '${playerSkin}' not loaded!`);
+                    console.error(`Player texture '${playerSkin}' not loaded, falling back to 'duck'`);
+                    playerSkin = 'duck';
                 }
                 this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
-                this.player.setScale(0.5 * sf);
+                // Conditional scaling: 0.5 * sf for original skins, 0.1 * sf for new skins
+                if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
+                    this.player.setScale(0.1 * sf);
+                } else {
+                    this.player.setScale(0.5 * sf);
+                }
                 this.player.body.setGravityY(800);
                 if (this.player.body) {
                     this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
@@ -771,48 +782,29 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(180, 120, `Score: ${this.finalScore}`, { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
 
-                const returnButton = this.add.text(180, 160, 'Return to Menu', {
-                    fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
-                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+                // Display "Game Over" message first
+                const gameOverText = this.add.text(180, 80, 'Game Over', {
+                    fontSize: '24px', color: '#ff0000'
+                }).setOrigin(0.5).setScale(sf);
 
-                if (isTelegram) {
-                    const shareButton = this.add.text(180, 200, 'Share Score', {
+                // Delay before showing the return button
+                this.time.delayedCall(1000, () => {
+                    gameOverText.destroy(); // Remove "Game Over" after delay
+                    this.add.text(180, 120, `Score: ${this.finalScore}`, {
+                        fontSize: '16px', color: '#000'
+                    }).setOrigin(0.5).setScale(sf);
+
+                    const returnButton = this.add.text(180, 160, 'Return to Menu', {
                         fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                    shareButton.on('pointerdown', () => {
-                        TelegramGameProxy.shareScore();
-                        this.add.text(180, 240, 'Score shared! Use /leaderboard\nin Telegram to see rankings.', {
-                            fontSize: '12px', color: '#000', align: 'center'
-                        }).setOrigin(0.5).setScale(sf);
-                    });
-                }
+                    returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+                }, [], this);
             }
 
             scaleFactor() {
                 return Math.min(this.game.config.width / 360, this.game.config.height / 640);
             }
-        }
-
-        // Extend TelegramGameProxy for leaderboard request
-        if (isTelegram) {
-            TelegramGameProxy.requestLeaderboard = function() {
-                TelegramGameProxy.postEvent('request_leaderboard');
-            };
-
-            TelegramGameProxy.onEvent('receive_leaderboard', (data) => {
-                const leaderboard = data.leaderboard || [];
-                const scene = game.scene.getScene('LeaderboardScene');
-                if (scene && scene.scene.isActive()) {
-                    let leaderboardText = 'No scores yet!';
-                    if (leaderboard.length > 0) {
-                        leaderboardText = leaderboard.map((entry, index) => `${index + 1}. @${entry.username}: ${entry.score}`).join('\n');
-                    }
-                    scene.leaderboardText.setText(leaderboardText);
-                }
-            });
         }
 
         // Phaser config
