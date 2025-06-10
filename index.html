@@ -778,7 +778,7 @@
                     if (this.score < 100) {
                         Achievements.consecutiveDeaths++;
                     } else {
-                        Achievements.consecutiveDeaths = 0;
+                        Achievements.consecutiveDeaths = 0; // Ensure reset on any score >= 100
                     }
                     this.scene.start('GameOverScene', { finalScore: this.score });
                 }
