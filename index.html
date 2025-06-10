@@ -26,19 +26,22 @@
                 score_100: { unlocked: true, skin: "golden_duck", description: "Score 100: Unlock Golden Duck" },
                 score_500: { unlocked: true, skin: "cyber_duck", description: "Score 500: Unlock Cyber Duck" },
                 score_1000: { unlocked: true, skin: "rainbow_duck", description: "Score 1000: Unlock Rainbow Duck" },
-                fire_duck: { unlocked: true, skin: "fire_duck", description: "Fire Duck: Unlocked Now!" },
-                ice_duck: { unlocked: true, skin: "ice_duck", description: "Ice Duck: Unlocked Now!" },
-                toxic_duck: { unlocked: true, skin: "toxic_duck", description: "Toxic Duck: Unlocked Now!" }
+                fire_duck: { unlocked: false, skin: "fire_duck", description: "Fire Duck: Hidden Unlock (Combo ≥ 100)", hidden: true },
+                ice_duck: { unlocked: false, skin: "ice_duck", description: "Ice Duck: Hidden Unlock (3 deaths < 100 points)", hidden: true },
+                toxic_duck: { unlocked: false, skin: "toxic_duck", description: "Toxic Duck: Hidden Unlock (Game Over in Night)", hidden: true }
             },
             selectedSkin: "duck",
+            consecutiveDeaths: 0,
+            maxScoreThisSession: 0,
             loadAchievements() {
                 const savedData = localStorage.getItem("duckJoyrideAchievements");
                 if (savedData) {
                     const data = JSON.parse(savedData);
-                    // Merge saved data with default achievements, ensuring new skins are included
                     this.achievements = { ...this.achievements, ...data.achievements };
+                    this.consecutiveDeaths = data.consecutiveDeaths || 0;
+                    this.maxScoreThisSession = data.maxScoreThisSession || 0;
+                    this.selectedSkin = data.selectedSkin || 'duck';
                 } else {
-                    // If no saved data, use default achievements
                     this.saveAchievements();
                 }
                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck'];
@@ -47,7 +50,9 @@
             saveAchievements() {
                 localStorage.setItem("duckJoyrideAchievements", JSON.stringify({
                     achievements: this.achievements,
-                    selectedSkin: this.selectedSkin
+                    selectedSkin: this.selectedSkin,
+                    consecutiveDeaths: this.consecutiveDeaths,
+                    maxScoreThisSession: this.maxScoreThisSession
                 }));
             },
             checkAchievements(score) {
@@ -63,6 +68,27 @@
                     this.achievements.score_1000.unlocked = true;
                     this.saveAchievements();
                 }
+                this.maxScoreThisSession = Math.max(this.maxScoreThisSession, score);
+            },
+            checkHiddenUnlocks(combo, deaths, isNightAtDeath) {
+                if (combo >= 100 && !this.achievements.fire_duck.unlocked) {
+                    this.achievements.fire_duck.unlocked = true;
+                    this.saveAchievements();
+                }
+                if (deaths >= 3 && this.maxScoreThisSession < 100 && !this.achievements.ice_duck.unlocked) {
+                    this.achievements.ice_duck.unlocked = true;
+                    this.consecutiveDeaths = 0;
+                    this.saveAchievements();
+                }
+                if (isNightAtDeath && !this.achievements.toxic_duck.unlocked) {
+                    this.achievements.toxic_duck.unlocked = true;
+                    this.saveAchievements();
+                }
+            },
+            resetSession() {
+                this.consecutiveDeaths = 0;
+                this.maxScoreThisSession = 0;
+                this.saveAchievements();
             },
             setSkin(skinName) {
                 this.selectedSkin = skinName;
@@ -168,6 +194,7 @@
                 skins.forEach(skin => {
                     const achievement = skin.key ? Achievements.achievements[skin.key] : null;
                     const isUnlocked = skin.unlocked || (achievement ? achievement.unlocked : false);
+                    if (!isUnlocked && achievement?.hidden) return;
                     const text = achievement ? `${achievement.description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
                     this.add.text(180, y, text, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
                     y += 24;
@@ -275,13 +302,11 @@
                 }
 
                 let playerSkin = Achievements.selectedSkin || 'duck';
-                // Fallback to 'duck' if the selected skin texture is not loaded
                 if (!this.textures.exists(playerSkin)) {
                     console.error(`Player texture '${playerSkin}' not loaded, falling back to 'duck'`);
                     playerSkin = 'duck';
                 }
                 this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
-                // Conditional scaling: 0.5 * sf for original skins, 0.1 * sf for new skins
                 if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
                     this.player.setScale(0.1 * sf);
                 } else {
@@ -325,12 +350,8 @@
 
                 if (isTelegram) {
                     this.touchArea = this.add.rectangle(180, 560, 180, 80, 0x000000, 0.1).setInteractive();
-                    this.touchArea.on('pointerdown', () => {
-                        this.isTouching = true;
-                    });
-                    this.touchArea.on('pointerup', () => {
-                        this.isTouching = false;
-                    });
+                    this.touchArea.on('pointerdown', () => this.isTouching = true);
+                    this.touchArea.on('pointerup', () => this.isTouching = false);
                 }
 
                 this.score = 0;
@@ -637,7 +658,7 @@
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
                 let basePoints = (this.peaMultiplierActive ? 2 : 1) * multiplier;
-                if (this.isNight) basePoints *= 2; // Double points at night
+                if (this.isNight) basePoints *= 2;
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
@@ -659,7 +680,7 @@
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
                 let basePoints = 20 * multiplier;
-                if (this.isNight) basePoints *= 2; // Double points at night
+                if (this.isNight) basePoints *= 2;
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
@@ -681,7 +702,7 @@
                 this.comboCount++;
                 const multiplier = this.comboCount >= 5 ? 1.5 : 1;
                 let basePoints = 50 * multiplier;
-                if (this.isNight) basePoints *= 2; // Double points at night
+                if (this.isNight) basePoints *= 2;
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
@@ -753,6 +774,12 @@
                     scores.sort((a, b) => b - a);
                     localStorage.setItem('duckJoyrideLeaderboard', JSON.stringify(scores));
                     Achievements.checkAchievements(this.score);
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths + 1, this.isNight);
+                    if (this.score < 100) {
+                        Achievements.consecutiveDeaths++;
+                    } else {
+                        Achievements.consecutiveDeaths = 0;
+                    }
                     this.scene.start('GameOverScene', { finalScore: this.score });
                 }
                 this.comboCount = 0;
@@ -778,14 +805,12 @@
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
 
-                // Display "Game Over" message first
                 const gameOverText = this.add.text(180, 80, 'Game Over', {
                     fontSize: '24px', color: '#ff0000'
                 }).setOrigin(0.5).setScale(sf);
 
-                // Delay before showing the return button
                 this.time.delayedCall(1000, () => {
-                    gameOverText.destroy(); // Remove "Game Over" after delay
+                    gameOverText.destroy();
                     this.add.text(180, 120, `Score: ${this.finalScore}`, {
                         fontSize: '16px', color: '#000'
                     }).setOrigin(0.5).setScale(sf);
@@ -793,7 +818,10 @@
                     const returnButton = this.add.text(180, 160, 'Return to Menu', {
                         fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
                     }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                    returnButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+                    returnButton.on('pointerdown', () => {
+                        Achievements.resetSession();
+                        this.scene.start('StartMenuScene');
+                    });
                 }, [], this);
             }
 
