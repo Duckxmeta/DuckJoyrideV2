@@ -170,11 +170,11 @@
                     fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
                 }).setOrigin(0.5).setScale(sf);
 
-                this.add.text(180, 250, 'Tap screen or press Space to fly.\nAvoid rocks, birds, and balloons.\nCollect peas (+1/+2), coins (+20),\nstars (+50 at night), and power-ups.\nPower-ups: Speed Boost (10s),\nShield, Pea Multiplier (30s),\nMagnet (30s).\nPoints are doubled at night!\nReach 100 points to level up.', {
+                this.add.text(180, 300, 'Tap screen or press Space to fly.\nAvoid rocks, birds, and balloons.\nCollect peas (+1/+2), coins (+20),\nstars (+50 at night), and power-ups.\nPower-ups: Speed Boost (10s),\nShield, Pea Multiplier (30s),\nMagnet (30s).\nPoints are doubled at night!\nReach 100 points to level up.', {
                     fontFamily: 'Arial', fontSize: '18px', color: '#fff', stroke: '#000', strokeThickness: 2, align: 'center'
                 }).setOrigin(0.5).setScale(sf);
 
-                const backButton = this.add.text(180, 470, 'Back to Menu', {
+                const backButton = this.add.text(180, 520, 'Back to Menu', {
                     fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
                     padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
@@ -348,7 +348,8 @@
             }
 
             preload() {
-                this.load.image('sky', 'https://i.imgur.com/hU7gyqk.jpeg');
+                this.load.image('day_sky', 'https://i.imgur.com/hU7gyqk.jpeg');
+                this.load.image('night_sky', 'https://i.imgur.com/S48QAwt.jpeg');
                 this.load.image('duck', 'https://i.imgur.com/pfFfvR0.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
@@ -384,12 +385,8 @@
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
 
-                if (this.textures.exists('sky')) {
-                    this.background = this.add.sprite(this.game.config.width / 2, this.game.config.height / 2, 'sky');
-                    this.background.setDisplaySize(this.game.config.width, this.game.config.height);
-                } else {
-                    console.warn('Sky texture not loaded, using fallback background color');
-                }
+                this.background = this.add.sprite(this.game.config.width / 2, this.game.config.height / 2, 'day_sky');
+                this.background.setDisplaySize(this.game.config.width, this.game.config.height);
 
                 let playerSkin = Achievements.selectedSkin || 'duck';
                 if (!this.textures.exists(playerSkin)) {
@@ -459,7 +456,6 @@
                 this.magnetTimer = 0;
                 this.dayNightTimer = 0;
                 this.isNight = false;
-                this.nightBrightness = 1.0;
 
                 this.peaSpawnTimer = 0;
                 this.starSpawnTimer = 0;
@@ -517,9 +513,10 @@
                 if (this.dayNightTimer >= 60) {
                     this.dayNightTimer = 0;
                     this.isNight = !this.isNight;
+                    this.background.setTexture(this.isNight ? 'night_sky' : 'day_sky');
+                    this.background.setDisplaySize(this.game.config.width, this.game.config.height);
+                    console.log(`Switched to ${this.isNight ? 'night' : 'day'} background`);
                 }
-                this.nightBrightness = this.isNight ? Math.max(0.3, this.nightBrightness - 0.1) : Math.min(1.0, this.nightBrightness + 0.1);
-                this.cameras.main.setBackgroundColor(Phaser.Display.Color.GetColor(0, 0, this.nightBrightness * 255));
 
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
 
