@@ -74,15 +74,18 @@
                 if (combo >= 100 && !this.achievements.fire_duck.unlocked) {
                     this.achievements.fire_duck.unlocked = true;
                     this.saveAchievements();
+                    console.log("Fire Duck unlocked!");
                 }
                 if (deaths >= 3 && this.maxScoreThisSession < 100 && !this.achievements.ice_duck.unlocked) {
                     this.achievements.ice_duck.unlocked = true;
                     this.consecutiveDeaths = 0;
                     this.saveAchievements();
+                    console.log("Ice Duck unlocked!");
                 }
                 if (isNightAtDeath && !this.achievements.toxic_duck.unlocked) {
                     this.achievements.toxic_duck.unlocked = true;
                     this.saveAchievements();
+                    console.log("Toxic Duck unlocked!");
                 }
             },
             resetSession() {
@@ -104,23 +107,38 @@
 
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
-                let highScore = localStorage.getItem("duckJoyrideHighScore") || 0;
-                this.add.text(180, 80, `High Score: ${highScore}`, {
-                    fontSize: '16px', color: '#000'
-                }).setOrigin(0.5).setScale(this.scaleFactor());
+                const sf = this.scaleFactor();
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x1e3c72, 1);
+                graphics.fillRoundedRect(30, 80, 300, 400, 10);
+                graphics.lineStyle(2, 0xffffff, 1);
+                graphics.strokeRoundedRect(30, 80, 300, 400, 10);
+
+                this.add.text(180, 120, 'Duck Joyride', {
+                    fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
+                }).setOrigin(0.5).setScale(sf);
+
+                const highScore = localStorage.getItem("duckJoyrideHighScore") || 0;
+                this.add.text(180, 160, `High Score: ${highScore}`, {
+                    fontFamily: 'Arial', fontSize: '20px', color: '#fff', stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setScale(sf);
 
                 const buttons = [
-                    { text: 'Start Game', scene: 'GameScene', y: 120 },
-                    { text: 'How to Play', scene: 'HowToPlayScene', y: 160 },
-                    { text: 'Achievements', scene: 'AchievementsScene', y: 200 },
-                    { text: 'Leaderboard', scene: 'LeaderboardScene', y: 240 },
-                    { text: 'Quit', action: () => alert('Game closed (simulated in browser)'), y: 280 }
+                    { text: 'Start Game', scene: 'GameScene', y: 220 },
+                    { text: 'How to Play', scene: 'HowToPlayScene', y: 260 },
+                    { text: 'Achievements', scene: 'AchievementsScene', y: 300 },
+                    { text: 'Leaderboard', scene: 'LeaderboardScene', y: 340 },
+                    { text: 'Quit', action: () => alert('Game closed (simulated in browser)'), y: 380 }
                 ];
 
                 buttons.forEach(btn => {
                     const button = this.add.text(180, btn.y, btn.text, {
-                        fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
-                    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(this.scaleFactor());
+                        fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
+                        padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                    button.setStyle({ backgroundColor: '#4facfe' });
+                    button.on('pointerover', () => button.setStyle({ backgroundColor: '#00f2fe' }));
+                    button.on('pointerout', () => button.setStyle({ backgroundColor: '#4facfe' }));
                     button.on('pointerdown', () => {
                         if (btn.scene) this.scene.start(btn.scene);
                         else btn.action();
@@ -142,23 +160,27 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(180, 40, 'How to Play', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                this.add.text(180, 120,
-                    'Tap screen or press Space to fly.\n' +
-                    'Avoid rocks, birds, and balloons.\n' +
-                    'Collect peas (+1/+2), coins (+20),\n' +
-                    'stars (+50 at night), and power-ups.\n' +
-                    'Power-ups: Speed Boost (10s),\n' +
-                    'Shield, Pea Multiplier (30s),\n' +
-                    'Magnet (30s).\n' +
-                    'Points are doubled at night!\n' +
-                    'Reach 100 points to level up.',
-                    { fontSize: '12px', color: '#000', align: 'center' }
-                ).setOrigin(0.5).setScale(sf);
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x1e3c72, 1);
+                graphics.fillRoundedRect(30, 100, 300, 380, 10); // Dark blue box
+                graphics.lineStyle(2, 0xffffff, 1);
+                graphics.strokeRoundedRect(30, 100, 300, 380, 10);
 
-                const backButton = this.add.text(180, 280, 'Back to Menu', {
-                    fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                this.add.text(180, 60, 'How to Play', { // Title above the box
+                    fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
+                }).setOrigin(0.5).setScale(sf);
+
+                this.add.text(180, 250, 'Tap screen or press Space to fly.\nAvoid rocks, birds, and balloons.\nCollect peas (+1/+2), coins (+20),\nstars (+50 at night), and power-ups.\nPower-ups: Speed Boost (10s),\nShield, Pea Multiplier (30s),\nMagnet (30s).\nPoints are doubled at night!\nReach 100 points to level up.', {
+                    fontFamily: 'Arial', fontSize: '18px', color: '#fff', stroke: '#000', strokeThickness: 2, align: 'center'
+                }).setOrigin(0.5).setScale(sf);
+
+                const backButton = this.add.text(180, 470, 'Back to Menu', {
+                    fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
+                    padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                backButton.setStyle({ backgroundColor: '#4facfe' });
+                backButton.on('pointerover', () => backButton.setStyle({ backgroundColor: '#00f2fe' }));
+                backButton.on('pointerout', () => backButton.setStyle({ backgroundColor: '#4facfe' }));
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
             }
 
@@ -176,10 +198,56 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                let y = 24;
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x1e3c72, 1);
+                graphics.fillRoundedRect(30, 80, 300, 300, 10);
+                graphics.lineStyle(2, 0xffffff, 1);
+                graphics.strokeRoundedRect(30, 80, 300, 300, 10);
 
-                this.add.text(180, y, 'Skins', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                y += 24;
+                this.add.text(180, 100, 'Skins', {
+                    fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
+                }).setOrigin(0.5).setScale(sf);
+
+                this.currentPage = 0;
+                this.itemsPerPage = 3;
+                this.updateAchievementsDisplay();
+
+                // Persistent navigation arrows
+                this.prevArrow = this.add.text(120, 360, '<', {
+                    fontFamily: 'Arial', fontSize: '24px', color: '#fff', stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                this.prevArrow.setStyle({ backgroundColor: '#4facfe', padding: { x: 10, y: 5 } });
+                this.prevArrow.on('pointerover', () => this.prevArrow.setStyle({ backgroundColor: '#00f2fe' }));
+                this.prevArrow.on('pointerout', () => this.prevArrow.setStyle({ backgroundColor: '#4facfe' }));
+                this.prevArrow.on('pointerdown', () => this.changePage(-1));
+
+                this.nextArrow = this.add.text(240, 360, '>', {
+                    fontFamily: 'Arial', fontSize: '24px', color: '#fff', stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                this.nextArrow.setStyle({ backgroundColor: '#4facfe', padding: { x: 10, y: 5 } });
+                this.nextArrow.on('pointerover', () => this.nextArrow.setStyle({ backgroundColor: '#00f2fe' }));
+                this.nextArrow.on('pointerout', () => this.nextArrow.setStyle({ backgroundColor: '#4facfe' }));
+                this.nextArrow.on('pointerdown', () => this.changePage(1));
+
+                // Persistent back button
+                this.backButton = this.add.text(180, 400, 'Back to Menu', {
+                    fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
+                    padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                this.backButton.setStyle({ backgroundColor: '#4facfe' });
+                this.backButton.on('pointerover', () => this.backButton.setStyle({ backgroundColor: '#00f2fe' }));
+                this.backButton.on('pointerout', () => this.backButton.setStyle({ backgroundColor: '#4facfe' }));
+                this.backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+            }
+
+            updateAchievementsDisplay() {
+                const sf = this.scaleFactor();
+                // Clear only the dynamic achievement items, not navigation or back button
+                this.children.list.forEach(child => {
+                    if (child.type === 'Text' && child.y >= 140 && child !== this.prevArrow && child !== this.nextArrow && child !== this.backButton && child !== this.children.list.find(c => c.y === 100)) {
+                        child.destroy();
+                    }
+                });
 
                 const skins = [
                     { name: 'duck', label: 'Duck', unlocked: true },
@@ -191,27 +259,40 @@
                     { name: 'toxic_duck', key: 'toxic_duck' }
                 ];
 
-                skins.forEach(skin => {
+                const startIdx = this.currentPage * this.itemsPerPage;
+                const endIdx = startIdx + this.itemsPerPage;
+                const paginatedSkins = skins.slice(startIdx, endIdx);
+
+                let y = 140;
+                paginatedSkins.forEach(skin => {
                     const achievement = skin.key ? Achievements.achievements[skin.key] : null;
                     const isUnlocked = skin.unlocked || (achievement ? achievement.unlocked : false);
                     if (!isUnlocked && achievement?.hidden) return;
                     const text = achievement ? `${achievement.description} (${isUnlocked ? 'Unlocked' : 'Locked'})` : skin.label;
-                    this.add.text(180, y, text, { fontSize: '12px', color: '#000' }).setOrigin(0.5).setScale(sf);
-                    y += 24;
+                    this.add.text(180, y, text, {
+                        fontFamily: 'Arial', fontSize: '18px', color: '#fff', stroke: '#000', strokeThickness: 2
+                    }).setOrigin(0.5).setScale(sf);
+                    y += 40;
+
                     const button = this.add.text(180, y, 'Select', {
-                        fontSize: '12px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                        fontFamily: 'Arial', fontSize: '18px', color: '#fff', backgroundColor: '#4facfe',
+                        padding: { x: 20, y: 5 }, stroke: '#000', strokeThickness: 2
                     }).setOrigin(0.5).setInteractive({ useHandCursor: isUnlocked }).setScale(sf);
+                    button.setStyle({ backgroundColor: '#4facfe' });
                     button.setAlpha(isUnlocked ? 1 : 0.5);
+                    button.on('pointerover', () => button.setStyle({ backgroundColor: '#00f2fe' }));
+                    button.on('pointerout', () => button.setStyle({ backgroundColor: '#4facfe' }));
                     button.on('pointerdown', () => {
                         if (isUnlocked) Achievements.setSkin(skin.name);
                     });
-                    y += 32;
+                    y += 40;
                 });
+            }
 
-                const backButton = this.add.text(180, y, 'Back to Menu', {
-                    fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
-                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
+            changePage(delta) {
+                const totalPages = Math.ceil(7 / this.itemsPerPage);
+                this.currentPage = (this.currentPage + delta + totalPages) % totalPages;
+                this.updateAchievementsDisplay();
             }
 
             scaleFactor() {
@@ -228,21 +309,30 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
-                this.add.text(180, 24, 'Leaderboard - Top 5', { fontSize: '16px', color: '#000' }).setOrigin(0.5).setScale(sf);
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x1e3c72, 1);
+                graphics.fillRoundedRect(30, 80, 300, 200, 10);
+                graphics.lineStyle(2, 0xffffff, 1);
+                graphics.strokeRoundedRect(30, 80, 300, 200, 10);
 
-                if (!isTelegram) {
-                    this.add.text(180, 64, 'Leaderboards are only\navailable in Telegram!', {
-                        fontSize: '12px', color: '#000', align: 'center'
-                    }).setOrigin(0.5).setScale(sf);
-                } else {
-                    this.add.text(180, 64, 'Check the leaderboard by\nusing /leaderboard\nin Telegram chat!', {
-                        fontSize: '12px', color: '#000', align: 'center'
-                    }).setOrigin(0.5).setScale(sf);
-                }
+                this.add.text(180, 100, 'Leaderboard - Top 5', {
+                    fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
+                }).setOrigin(0.5).setScale(sf);
 
-                const backButton = this.add.text(180, 160, 'Back to Menu', {
-                    fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
+                const message = !isTelegram ?
+                    'Leaderboards are only\navailable in Telegram!' :
+                    'Check the leaderboard by\nusing /leaderboard\nin Telegram chat!';
+                this.add.text(180, 160, message, {
+                    fontFamily: 'Arial', fontSize: '18px', color: '#fff', stroke: '#000', strokeThickness: 2, align: 'center'
+                }).setOrigin(0.5).setScale(sf);
+
+                const backButton = this.add.text(180, 220, 'Back to Menu', {
+                    fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
+                    padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
                 }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                backButton.setStyle({ backgroundColor: '#4facfe' });
+                backButton.on('pointerover', () => backButton.setStyle({ backgroundColor: '#00f2fe' }));
+                backButton.on('pointerout', () => backButton.setStyle({ backgroundColor: '#4facfe' }));
                 backButton.on('pointerdown', () => this.scene.start('StartMenuScene'));
             }
 
@@ -308,7 +398,7 @@
                 }
                 this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
                 if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
-                    this.player.setScale(0.1 * sf);
+                    this.player.setScale(0.11 * sf);
                 } else {
                     this.player.setScale(0.5 * sf);
                 }
@@ -328,13 +418,13 @@
                 this.peaPods = this.physics.add.group();
                 this.magnets = this.physics.add.group();
 
-                this.scoreLabel = this.add.text(8, 8, 'Score: 0', { fontSize: '16px', color: '#000' }).setScale(sf);
-                this.levelLabel = this.add.text(8, 24, 'Level: 1', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.comboLabel = this.add.text(8, 40, 'Combo: 0', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.speedBoostLabel = this.add.text(8, 56, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.peaPodLabel = this.add.text(8, 72, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.magnetLabel = this.add.text(8, 88, '', { fontSize: '14px', color: '#000' }).setScale(sf);
-                this.shieldIcon = this.add.image(24, 104, 'shield_icon').setVisible(false).setScale(0.3 * sf);
+                this.scoreLabel = this.add.text(8, 8, 'Score: 0', { fontFamily: 'Arial', fontSize: '20px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.levelLabel = this.add.text(8, 28, 'Level: 1', { fontFamily: 'Arial', fontSize: '16px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.comboLabel = this.add.text(8, 48, 'Combo: 0', { fontFamily: 'Arial', fontSize: '16px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.speedBoostLabel = this.add.text(8, 68, '', { fontFamily: 'Arial', fontSize: '16px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.peaPodLabel = this.add.text(8, 88, '', { fontFamily: 'Arial', fontSize: '16px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.magnetLabel = this.add.text(8, 108, '', { fontFamily: 'Arial', fontSize: '16px', color: '#000', stroke: '#fff', strokeThickness: 2 }).setScale(sf);
+                this.shieldIcon = this.add.image(24, 128, 'shield_icon').setVisible(false).setScale(0.3 * sf);
 
                 this.progressBar = this.add.graphics();
                 this.progressBar.fillStyle(0x000000, 1);
@@ -369,6 +459,7 @@
                 this.magnetTimer = 0;
                 this.dayNightTimer = 0;
                 this.isNight = false;
+                this.nightBrightness = 1.0;
 
                 this.peaSpawnTimer = 0;
                 this.starSpawnTimer = 0;
@@ -423,12 +514,12 @@
                 if (this.gameOver) return;
 
                 this.dayNightTimer += deltaSeconds;
-                if (this.dayNightTimer >= 30) {
-                    this.isNight = !this.isNight;
+                if (this.dayNightTimer >= 60) {
                     this.dayNightTimer = 0;
-                    this.cameras.main.setBackgroundColor(this.isNight ? '#1C2526' : '#87CEEB');
-                    this.cameras.main.setTint(this.isNight ? 0x6666ff : 0xffffff);
+                    this.isNight = !this.isNight;
                 }
+                this.nightBrightness = this.isNight ? Math.max(0.3, this.nightBrightness - 0.1) : Math.min(1.0, this.nightBrightness + 0.1);
+                this.cameras.main.setBackgroundColor(Phaser.Display.Color.GetColor(0, 0, this.nightBrightness * 255));
 
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
 
@@ -643,7 +734,7 @@
                     this.level++;
                     this.pointsToNextLevel += 100 * this.level;
                     this.levelLabel.setText(`Level: ${this.level}`);
-                    const levelUpText = this.add.text(180, 320, 'Level Up!', { fontSize: '16px', color: '#ff0' })
+                    const levelUpText = this.add.text(180, 320, 'Level Up!', { fontFamily: 'Arial', fontSize: '24px', color: '#ff0', stroke: '#000', strokeThickness: 2 })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -662,8 +753,11 @@
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
+                if (this.comboCount >= 100 && !Achievements.achievements.fire_duck.unlocked) {
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths, this.isNight);
+                }
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontFamily: 'Arial', fontSize: '18px', color: '#ff0', stroke: '#000', strokeThickness: 2 })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -684,8 +778,11 @@
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
+                if (this.comboCount >= 100 && !Achievements.achievements.fire_duck.unlocked) {
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths, this.isNight);
+                }
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontFamily: 'Arial', fontSize: '18px', color: '#ff0', stroke: '#000', strokeThickness: 2 })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -706,8 +803,11 @@
                 this.score += basePoints;
                 this.scoreLabel.setText(`Score: ${this.score}`);
                 this.comboLabel.setText(`Combo: ${this.comboCount}`);
+                if (this.comboCount >= 100 && !Achievements.achievements.fire_duck.unlocked) {
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths, this.isNight);
+                }
                 if (this.comboCount >= 5 && this.comboCount % 5 === 0) {
-                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontSize: '12px', color: '#ff0' })
+                    const comboText = this.add.text(player.x, player.y - 24, `Combo x${this.comboCount}!`, { fontFamily: 'Arial', fontSize: '18px', color: '#ff0', stroke: '#000', strokeThickness: 2 })
                         .setOrigin(0.5)
                         .setDepth(100)
                         .setScale(this.scaleFactor());
@@ -778,7 +878,7 @@
                     if (this.score < 100) {
                         Achievements.consecutiveDeaths++;
                     } else {
-                        Achievements.consecutiveDeaths = 0; // Ensure reset on any score >= 100
+                        Achievements.consecutiveDeaths = 0;
                     }
                     this.scene.start('GameOverScene', { finalScore: this.score });
                 }
@@ -804,25 +904,31 @@
             create() {
                 this.cameras.main.setBackgroundColor('#87CEEB');
                 const sf = this.scaleFactor();
+                const graphics = this.add.graphics();
+                graphics.fillStyle(0x1e3c72, 1);
+                graphics.fillRoundedRect(30, 80, 300, 200, 10);
+                graphics.lineStyle(2, 0xffffff, 1);
+                graphics.strokeRoundedRect(30, 80, 300, 200, 10);
 
-                const gameOverText = this.add.text(180, 80, 'Game Over', {
-                    fontSize: '24px', color: '#ff0000'
+                this.add.text(180, 120, 'Game Over', {
+                    fontFamily: 'Arial', fontSize: '32px', color: '#fff', stroke: '#000', strokeThickness: 4
                 }).setOrigin(0.5).setScale(sf);
 
-                this.time.delayedCall(1000, () => {
-                    gameOverText.destroy();
-                    this.add.text(180, 120, `Score: ${this.finalScore}`, {
-                        fontSize: '16px', color: '#000'
-                    }).setOrigin(0.5).setScale(sf);
+                this.add.text(180, 160, `Score: ${this.finalScore}`, {
+                    fontFamily: 'Arial', fontSize: '24px', color: '#fff', stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setScale(sf);
 
-                    const returnButton = this.add.text(180, 160, 'Return to Menu', {
-                        fontSize: '14px', color: '#00f', backgroundColor: '#fff', padding: { x: 10, y: 5 }
-                    }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
-                    returnButton.on('pointerdown', () => {
-                        Achievements.resetSession();
-                        this.scene.start('StartMenuScene');
-                    });
-                }, [], this);
+                const returnButton = this.add.text(180, 200, 'Return to Menu', {
+                    fontFamily: 'Arial', fontSize: '20px', color: '#fff', backgroundColor: '#4facfe',
+                    padding: { x: 20, y: 10 }, stroke: '#000', strokeThickness: 2
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true }).setScale(sf);
+                returnButton.setStyle({ backgroundColor: '#4facfe' });
+                returnButton.on('pointerover', () => returnButton.setStyle({ backgroundColor: '#00f2fe' }));
+                returnButton.on('pointerout', () => returnButton.setStyle({ backgroundColor: '#4facfe' }));
+                returnButton.on('pointerdown', () => {
+                    Achievements.resetSession();
+                    this.scene.start('StartMenuScene');
+                });
             }
 
             scaleFactor() {
@@ -847,6 +953,7 @@
         // Initialize game
         Achievements.loadAchievements();
         const game = new Phaser.Game(config);
+        console.log("Game initialized");
 
         // Start directly in GameScene if running in Telegram
         if (isTelegram) {
