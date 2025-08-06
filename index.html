@@ -376,15 +376,22 @@
             
             create() {
                 const { width, height } = this.game.config;
-                // **MODIFICATION: Using a scrolling TileSprite for the in-game background**
-                this.background = this.add.tileSprite(0, 0, width, height, 'day_sky').setOrigin(0, 0);
-                this.background.setTileScale(width / this.textures.get('day_sky').width, height / this.textures.get('day_sky').height);
-
+                // **FIX: Reverted to original background implementation**
+                this.background = this.add.sprite(width / 2, height / 2, 'day_sky');
+                this.background.setDisplaySize(width, height);
 
                 const sf = scaleFactor(this);
                 let playerSkin = Achievements.selectedSkin || 'duck';
                 this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
-                this.player.setScale(0.5 * sf).setGravityY(800);
+                
+                // **FIX: Added conditional scaling for special skins**
+                if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
+                    this.player.setScale(0.11 * sf);
+                } else {
+                    this.player.setScale(0.5 * sf);
+                }
+                
+                this.player.setGravityY(800);
                 if (this.player.body) this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
 
                 this.peas = this.physics.add.group(); this.coins = this.physics.add.group(); this.stars = this.physics.add.group(); this.rocks = this.physics.add.group(); this.birds = this.physics.add.group(); this.balloons = this.physics.add.group(); this.speedBoosts = this.physics.add.group(); this.shields = this.physics.add.group(); this.peaPods = this.physics.add.group(); this.magnets = this.physics.add.group();
@@ -412,15 +419,15 @@
                 const deltaSeconds = delta / 1000; 
                 if (this.gameOver) return;
 
-                // **MODIFICATION: Scrolling the tileSprite background**
-                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.1;
+                // **FIX: Removed background scrolling logic**
 
                 this.dayNightTimer += deltaSeconds; 
                 if (this.dayNightTimer >= 60) { 
                     this.dayNightTimer = 0; 
                     this.isNight = !this.isNight; 
-                    // **MODIFICATION: Switching the texture of the tileSprite**
+                    // **FIX: Reverted to original texture switching**
                     this.background.setTexture(this.isNight ? 'night_sky' : 'day_sky');
+                    this.background.setDisplaySize(this.game.config.width, this.game.config.height);
                 }
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
                 if (this.speedBoostActive) { 
