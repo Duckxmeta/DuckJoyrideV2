@@ -170,7 +170,7 @@
                  } else {
                      this.saveAchievements();
                  }
-                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck', 'decent_duck', 'decent_duck_2'];
+                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck', 'decent_duck', 'decent_duck_2', 'decent_duck_3', 'decent_duck_4', 'decent_duck_5'];
                  this.selectedSkin = validSkins.includes(this.selectedSkin) ? this.selectedSkin : 'duck';
              },
              saveAchievements() {
@@ -216,12 +216,18 @@
                 createGradientTexture(this, 'bg_gradient', this.game.config.width, this.game.config.height, Theme.colors.bgGradient.topLeft, Theme.colors.bgGradient.bottomRight);
                 createGradientTexture(this, 'gold_button_gradient', 280, 56, Theme.colors.accentGradient.topLeft, Theme.colors.accentGradient.bottomRight);
 
-                // Load all image assets
-                this.load.image('day_sky', 'https://i.imgur.com/hU7gyqk.jpeg');
-                this.load.image('night_sky', 'https://i.imgur.com/S48QAwt.jpeg');
+                this.load.image('bg_day_1', 'https://i.imgur.com/Ydj1Ahf.png');
+                this.load.image('bg_sunset', 'https://i.imgur.com/AccxT6z.png');
+                this.load.image('bg_night', 'https://i.imgur.com/x7Hufmr.png');
+                this.load.image('bg_day_2', 'https://i.imgur.com/BVZCQ0e.png');
+
+                // Load all other image assets
                 this.load.image('duck', 'https://i.imgur.com/pfFfvR0.png');
                 this.load.image('decent_duck', 'https://i.imgur.com/4t0d1Ab.png');
                 this.load.image('decent_duck_2', 'https://i.imgur.com/TapqnPm.png');
+                this.load.image('decent_duck_3', 'https://i.imgur.com/Nq6sMSC.png');
+                this.load.image('decent_duck_4', 'https://i.imgur.com/5UCdZF5.png');
+                this.load.image('decent_duck_5', 'https://i.imgur.com/t46FqIo.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
                 this.load.image('rainbow_duck', 'https://i.imgur.com/yz3RYaz.png');
@@ -364,8 +370,11 @@
                     { name: 'fire_duck', key: 'fire_duck', category: 'og' },
                     { name: 'ice_duck', key: 'ice_duck', category: 'og' },
                     { name: 'toxic_duck', key: 'toxic_duck', category: 'og' },
-                    { name: 'decent_duck', label: 'Decent Duck', unlocked: true, category: 'decent' },
-                    { name: 'decent_duck_2', label: 'Decent Duck V2', unlocked: true, category: 'decent' }
+                    { name: 'decent_duck', label: 'Decent Duck #233', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_2', label: 'Decent Duck #682', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_3', label: 'Decent Duck #817', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_4', label: 'Decent Duck #162', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_5', label: 'Decent Duck #313', unlocked: true, category: 'decent' }
                 ];
 
                 const skins = allSkins.filter(skin => skin.category === this.category);
@@ -424,8 +433,11 @@
                     { name: 'fire_duck', key: 'fire_duck', category: 'og' },
                     { name: 'ice_duck', key: 'ice_duck', category: 'og' },
                     { name: 'toxic_duck', key: 'toxic_duck', category: 'og' },
-                    { name: 'decent_duck', label: 'Decent Duck', unlocked: true, category: 'decent' },
-                    { name: 'decent_duck_2', label: 'Decent Duck V2', unlocked: true, category: 'decent' }
+                    { name: 'decent_duck', label: 'Decent Duck #233', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_2', label: 'Decent Duck #682', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_3', label: 'Decent Duck #817', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_4', label: 'Decent Duck #162', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_5', label: 'Decent Duck #313', unlocked: true, category: 'decent' }
                 ];
                 const skins = allSkins.filter(skin => skin.category === this.category);
                 const totalPages = Math.ceil(skins.length / this.itemsPerPage);
@@ -471,9 +483,11 @@
             create() {
                 const { width, height } = this.game.config;
                 
-                // This creates a non-scrolling background that fills the screen.
-                this.background = this.add.sprite(width / 2, height / 2, 'day_sky');
-                this.background.setDisplaySize(width, height);
+                this.backgrounds = ['bg_day_1', 'bg_sunset', 'bg_night', 'bg_day_2'];
+                this.darkBackgrounds = ['bg_sunset', 'bg_night'];
+                this.currentBackgroundIndex = 0;
+                this.backgroundCycleTimer = 0;
+                this.background = this.add.tileSprite(0, 0, width, height, this.backgrounds[0]).setOrigin(0, 0);
 
                 const sf = scaleFactor(this);
                 let playerSkin = Achievements.selectedSkin || 'duck';
@@ -482,7 +496,7 @@
                 // Adjust scale for different skins
                 if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
                     this.player.setScale(0.11 * sf);
-                } else if (playerSkin === 'decent_duck' || playerSkin === 'decent_duck_2') {
+                } else if (playerSkin.startsWith('decent_duck')) {
                     // Scale this specific skin down by 70% (to 30% of its original scale)
                     this.player.setScale(0.5 * 0.3 * sf); 
                 }
@@ -511,7 +525,7 @@
                 this.cursors = this.input.keyboard.createCursorKeys(); this.isTouching = false; this.input.on('pointerdown', () => this.isTouching = true); this.input.on('pointerup', () => this.isTouching = false);
                 
                 // Initialize game state variables
-                this.score = 0; this.level = 1; this.pointsToNextLevel = 100; this.comboCount = 0; this.gameOver = false; this.speedBoostActive = false; this.speedBoostTimer = 0; this.isInvincible = false; this.hasShield = false; this.peaMultiplierActive = false; this.peaMultiplierTimer = 0; this.magnetActive = false; this.magnetTimer = 0; this.dayNightTimer = 0; this.isNight = false;
+                this.score = 0; this.level = 1; this.pointsToNextLevel = 100; this.comboCount = 0; this.gameOver = false; this.speedBoostActive = false; this.speedBoostTimer = 0; this.isInvincible = false; this.hasShield = false; this.peaMultiplierActive = false; this.peaMultiplierTimer = 0; this.magnetActive = false; this.magnetTimer = 0;
                 
                 this.obstacleSpawnTimer = 0;
                 this.peaSpawnTimer = 0;
@@ -532,13 +546,25 @@
                 const deltaSeconds = delta / 1000; 
                 if (this.gameOver) return;
 
-                // Day/Night cycle logic
-                this.dayNightTimer += deltaSeconds; 
-                if (this.dayNightTimer >= 60) { 
-                    this.dayNightTimer = 0; 
-                    this.isNight = !this.isNight; 
-                    // Switch the texture of the background sprite
-                    this.background.setTexture(this.isNight ? 'night_sky' : 'day_sky');
+                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.5;
+
+                this.backgroundCycleTimer += deltaSeconds;
+                if (this.backgroundCycleTimer >= 60) {
+                    this.backgroundCycleTimer = 0;
+                    this.currentBackgroundIndex = (this.currentBackgroundIndex + 1) % this.backgrounds.length;
+                    const newBackgroundKey = this.backgrounds[this.currentBackgroundIndex];
+                    this.background.setTexture(newBackgroundKey);
+
+                    // Update HUD color based on the new background
+                    if (this.darkBackgrounds.includes(newBackgroundKey)) {
+                        this.scoreLabel.setColor('#ffffff');
+                        this.levelLabel.setColor('#ffffff');
+                        this.comboLabel.setColor('#ffffff');
+                    } else {
+                        this.scoreLabel.setColor('#000000');
+                        this.levelLabel.setColor('#333333');
+                        this.comboLabel.setColor('#333333');
+                    }
                 }
                 
                 // Player controls
@@ -635,8 +661,7 @@
                     this.peaSpawnTimer = 0; 
                 }
 
-                // Spawn stars at night
-                if (this.isNight) { 
+                if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') { 
                     this.starSpawnTimer += deltaSeconds; 
                     if (this.starSpawnTimer >= 10) { 
                         const s = this.stars.create(width + 50, Phaser.Math.Between(45, 595), 'star'); 
@@ -703,9 +728,46 @@
             }
 
             checkLevelUp() { if (this.score >= this.pointsToNextLevel) { this.level++; this.pointsToNextLevel += 100 * this.level; this.levelLabel.setText(`Level: ${this.level}`); const t = this.add.text(180, 320, 'Level Up!', { fontFamily: Theme.fonts.body, fontSize: '24px', color: '#ffd700', shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 4, fill: true } }).setOrigin(0.5).setDepth(100).setScale(scaleFactor(this)); this.time.delayedCall(1000, () => t.destroy()); } }
-            collectPea(p, pea) { if (this.gameOver) return; this.comboCount++; const m = this.comboCount >= 5 ? 1.5 : 1; let b = (this.peaMultiplierActive ? 2 : 1) * m; if (this.isNight) b *= 2; this.score += b; this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); this.comboLabel.setText(`Combo: ${this.comboCount}`); this.checkLevelUp(); pea.destroy(); }
-            collectCoin(p, coin) { if (this.gameOver) return; this.comboCount++; const m = this.comboCount >= 5 ? 1.5 : 1; let b = 20 * m; if (this.isNight) b *= 2; this.score += b; this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); this.comboLabel.setText(`Combo: ${this.comboCount}`); this.checkLevelUp(); coin.destroy(); }
-            collectStar(p, star) { if (this.gameOver) return; this.comboCount++; const m = this.comboCount >= 5 ? 1.5 : 1; let b = 50 * m; if (this.isNight) b *= 2; this.score += b; this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); this.comboLabel.setText(`Combo: ${this.comboCount}`); this.checkLevelUp(); star.destroy(); }
+            
+            collectPea(p, pea) { 
+                if (this.gameOver) return; 
+                this.comboCount++; 
+                const m = this.comboCount >= 5 ? 1.5 : 1; 
+                let b = (this.peaMultiplierActive ? 2 : 1) * m; 
+                if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') b *= 2; 
+                this.score += b; 
+                this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); 
+                this.comboLabel.setText(`Combo: ${this.comboCount}`); 
+                this.checkLevelUp(); 
+                pea.destroy(); 
+            }
+            
+            collectCoin(p, coin) { 
+                if (this.gameOver) return; 
+                this.comboCount++; 
+                const m = this.comboCount >= 5 ? 1.5 : 1; 
+                let b = 20 * m; 
+                if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') b *= 2; 
+                this.score += b; 
+                this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); 
+                this.comboLabel.setText(`Combo: ${this.comboCount}`); 
+                this.checkLevelUp(); 
+                coin.destroy(); 
+            }
+
+            collectStar(p, star) { 
+                if (this.gameOver) return; 
+                this.comboCount++; 
+                const m = this.comboCount >= 5 ? 1.5 : 1; 
+                let b = 50 * m; 
+                if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') b *= 2; 
+                this.score += b; 
+                this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); 
+                this.comboLabel.setText(`Combo: ${this.comboCount}`); 
+                this.checkLevelUp(); 
+                star.destroy(); 
+            }
+
             collectSpeedBoost(p, sb) { if (this.gameOver) return; this.speedBoostActive = true; this.speedBoostTimer = 10; this.isInvincible = true; Global.currentScrollSpeed = Global.baseScrollSpeed * (1 + (this.level - 1) * 0.1) * 2; this.powerUpEmitter.emitParticleAt(sb.x, sb.y); sb.destroy(); }
             collectShield(p, s) { if (this.gameOver) return; this.hasShield = true; this.powerUpEmitter.emitParticleAt(s.x, s.y); s.destroy(); }
             collectPeaPod(p, pp) { if (this.gameOver) return; this.peaMultiplierActive = true; this.peaMultiplierTimer = 30; this.powerUpEmitter.emitParticleAt(pp.x, pp.y); pp.destroy(); }
@@ -722,8 +784,11 @@
                     this.score = Math.floor(this.score); 
                     let hs = parseInt(localStorage.getItem("duckJoyrideHighScore") || 0); 
                     if (this.score > hs) localStorage.setItem("duckJoyrideHighScore", this.score); 
+                    
+                    const isNightAtDeath = this.backgrounds[this.currentBackgroundIndex] === 'bg_night';
                     Achievements.checkAchievements(this.score); 
-                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths + 1, this.isNight); 
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths + 1, isNightAtDeath); 
+                    
                     if (this.score < 100) Achievements.consecutiveDeaths++; else Achievements.consecutiveDeaths = 0; 
                     this.scene.start('GameOverScene', { finalScore: this.score }); 
                 } 
