@@ -35,6 +35,7 @@
     <div id="game-container"></div>
     <script>
         // --- THEME DEFINITION ---
+        // Defines the visual style of the game (colors, fonts, etc.) for a consistent look.
         const Theme = {
             colors: {
                 bgGradient: {
@@ -76,6 +77,8 @@
         };
 
         // --- UTILITY FUNCTIONS ---
+
+        // Creates a canvas texture with a gradient, used for backgrounds and buttons.
         function createGradientTexture(scene, key, width, height, color1, color2, vertical = true) {
             const canvas = document.createElement('canvas');
             canvas.width = width;
@@ -89,40 +92,52 @@
             scene.textures.addCanvas(key, canvas);
         }
 
+        // Creates a semi-transparent "glass" card for UI backgrounds.
         function createGlassCard(scene, x, y, width, height) {
             const card = scene.add.graphics();
+            // Shadow
             card.fillStyle(Theme.shadow.color, Theme.shadow.alpha);
             card.fillRoundedRect(x + Theme.shadow.offsetX, y + Theme.shadow.offsetY, width, height, Theme.borderRadius.card);
+            // Glass fill
             card.fillStyle(0xffffff, 0.1);
             card.fillRoundedRect(x, y, width, height, Theme.borderRadius.card);
+            // Border
             card.lineStyle(1, 0xffd700, 0.3);
             card.strokeRoundedRect(x, y, width, height, Theme.borderRadius.card);
             return card;
         }
 
+        // Creates a reusable, stylized button with a golden gradient.
         function createGoldButton(scene, x, y, text, onClick) {
             const width = 280;
             const height = 56;
             const sf = scaleFactor(scene);
+
+            // Create and mask the button image for rounded corners
             const buttonImage = scene.add.image(x, y, 'gold_button_gradient').setDisplaySize(width, height);
             const maskShape = scene.make.graphics();
             maskShape.fillStyle(0xffffff);
             maskShape.fillRoundedRect(x - width / 2, y - height / 2, width, height, Theme.borderRadius.button);
             const mask = maskShape.createGeometryMask();
             buttonImage.setMask(mask);
+
             const buttonText = scene.add.text(x, y, text, {
                 fontFamily: Theme.fonts.body,
                 fontSize: `${22 * sf}px`,
                 color: Theme.colors.text.onAccent,
                 fontStyle: 'bold'
             }).setOrigin(0.5);
+
+            // Create an interactive zone for clicks and hover effects
             const hitArea = scene.add.zone(x, y, width, height).setInteractive({ useHandCursor: true });
             hitArea.on('pointerdown', onClick);
             hitArea.on('pointerover', () => { buttonImage.setAlpha(0.9); });
             hitArea.on('pointerout', () => { buttonImage.setAlpha(1); });
+
             return { bg: buttonImage, text: buttonText, zone: hitArea, mask: maskShape };
         }
         
+        // Calculates a scale factor based on the game's dimensions for responsive UI.
         function scaleFactor(scene) {
             return Math.min(scene.game.config.width / 360, scene.game.config.height / 640);
         }
@@ -130,6 +145,8 @@
         // --- GLOBAL & ACHIEVEMENTS ---
         const isTelegram = typeof TelegramGameProxy !== 'undefined';
         const Global = { baseScrollSpeed: 200.0, currentScrollSpeed: 200.0 };
+        
+        // Manages achievements, skin unlocks, and saving/loading progress.
         const Achievements = {
              achievements: {
                  score_100: { unlocked: true, skin: "golden_duck", description: "Score 100: Golden Duck" },
@@ -153,7 +170,7 @@
                  } else {
                      this.saveAchievements();
                  }
-                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck'];
+                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck', 'decent_duck', 'decent_duck_2'];
                  this.selectedSkin = validSkins.includes(this.selectedSkin) ? this.selectedSkin : 'duck';
              },
              saveAchievements() {
@@ -190,16 +207,21 @@
 
         // --- SCENES ---
 
+        // PreloaderScene: Loads all game assets before starting.
         class PreloaderScene extends Phaser.Scene {
             constructor() { super('PreloaderScene'); }
 
             preload() {
+                // Create gradient textures dynamically
                 createGradientTexture(this, 'bg_gradient', this.game.config.width, this.game.config.height, Theme.colors.bgGradient.topLeft, Theme.colors.bgGradient.bottomRight);
                 createGradientTexture(this, 'gold_button_gradient', 280, 56, Theme.colors.accentGradient.topLeft, Theme.colors.accentGradient.bottomRight);
 
+                // Load all image assets
                 this.load.image('day_sky', 'https://i.imgur.com/hU7gyqk.jpeg');
                 this.load.image('night_sky', 'https://i.imgur.com/S48QAwt.jpeg');
                 this.load.image('duck', 'https://i.imgur.com/pfFfvR0.png');
+                this.load.image('decent_duck', 'https://i.imgur.com/4t0d1Ab.png');
+                this.load.image('decent_duck_2', 'https://i.imgur.com/TapqnPm.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
                 this.load.image('rainbow_duck', 'https://i.imgur.com/yz3RYaz.png');
@@ -217,7 +239,7 @@
                 this.load.image('rock', 'https://i.imgur.com/aZHb2XN.png');
                 this.load.image('bird', 'https://i.imgur.com/hnrVw4d.png');
                 this.load.image('star', 'https://i.imgur.com/JWNPyIs.png');
-                this.load.image('particle', 'https://i.imgur.com/An0FCpc.png');
+                this.load.image('particle', 'https://i.imgur.com/An0FCpc.png'); // Used for particle effects
             }
 
             create() {
@@ -225,47 +247,57 @@
             }
         }
 
+        // StartMenuScene: The main menu of the game.
         class StartMenuScene extends Phaser.Scene {
             constructor() { super('StartMenuScene'); }
             create() {
                 this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
                 const centerX = this.game.config.width / 2;
                 const sf = scaleFactor(this);
+
                 this.add.text(centerX, 100, 'Duck Joyride', {
                     fontFamily: Theme.fonts.headings,
                     fontSize: `${48 * sf}px`,
                     color: Theme.colors.text.primary,
                 }).setOrigin(0.5).setShadow(2, 2, Theme.colors.shadow, 2);
+
                 const highScore = localStorage.getItem("duckJoyrideHighScore") || 0;
                 this.add.text(centerX, 160, `High Score: ${highScore}`, {
                     fontFamily: Theme.fonts.body,
                     fontSize: `${20 * sf}px`,
                     color: Theme.colors.text.secondary,
                 }).setOrigin(0.5);
+
                 const buttons = [
-                    { text: 'Start Game', action: () => this.scene.start('GameScene') },
-                    { text: 'How to Play', action: () => this.scene.start('HowToPlayScene') },
-                    { text: 'Skins', action: () => this.scene.start('AchievementsScene') },
-                    { text: 'Leaderboard', action: () => this.scene.start('LeaderboardScene') },
+                    { text: 'Start Game', y: 250, action: () => this.scene.start('GameScene') },
+                    { text: 'How to Play', y: 320, action: () => this.scene.start('HowToPlayScene') },
+                    { text: 'OG Skins', y: 390, action: () => this.scene.start('AchievementsScene', { category: 'og' }) },
+                    { text: 'Decent Ducks', y: 460, action: () => this.scene.start('AchievementsScene', { category: 'decent' }) },
+                    { text: 'Leaderboard', y: 530, action: () => this.scene.start('LeaderboardScene') },
                 ];
-                buttons.forEach((btn, index) => {
-                    createGoldButton(this, centerX, 250 + index * 70, btn.text, btn.action);
+
+                buttons.forEach(btn => {
+                    createGoldButton(this, centerX, btn.y, btn.text, btn.action);
                 });
             }
         }
         
+        // HowToPlayScene: Displays instructions.
         class HowToPlayScene extends Phaser.Scene {
             constructor() { super('HowToPlayScene'); }
             create() {
                 this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
                 const centerX = this.game.config.width / 2;
                 const sf = scaleFactor(this);
+
                 createGlassCard(this, 30, 60, 300, 450);
+
                 this.add.text(centerX, 100, 'How to Play', {
                     fontFamily: Theme.fonts.headings,
                     fontSize: `${36 * sf}px`,
                     color: Theme.colors.text.primary,
                 }).setOrigin(0.5);
+
                 const instructions = 'Tap or press Space to fly up.\n\nAvoid rocks, birds, and balloons.\n\nCollect peas, coins, and stars for points.\n\nGrab power-ups for a boost!\n\nSurvive as long as you can!';
                 this.add.text(centerX, 280, instructions, {
                     fontFamily: Theme.fonts.body,
@@ -274,29 +306,44 @@
                     align: 'center',
                     wordWrap: { width: 280, useAdvancedWrap: true }
                 }).setOrigin(0.5);
+
                 createGoldButton(this, centerX, 560, 'Back to Menu', () => this.scene.start('StartMenuScene'));
             }
         }
 
+        // AchievementsScene: Displays unlockable skins based on category.
         class AchievementsScene extends Phaser.Scene {
             constructor() { super('AchievementsScene'); }
+
+            init(data) {
+                this.category = data.category || 'og'; // Default to 'og'
+            }
+
             create() {
                 this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
                 const centerX = this.game.config.width / 2;
-                this.add.text(centerX, 60, 'Select a Skin', {
+
+                const title = this.category === 'og' ? 'OG Skins' : 'Decent Ducks';
+                this.add.text(centerX, 60, title, {
                     fontFamily: Theme.fonts.headings,
                     fontSize: `${36 * scaleFactor(this)}px`,
                     color: Theme.colors.text.primary,
                 }).setOrigin(0.5);
+
                 this.currentPage = 0;
                 this.itemsPerPage = 3;
                 this.achievementItems = [];
+                
+                this.prevButton = createGoldButton(this, 90, 500, '<', () => this.changePage(-1));
+                this.nextButton = createGoldButton(this, 270, 500, '>', () => this.changePage(1));
+                
                 this.updateAchievementsDisplay();
-                createGoldButton(this, 90, 500, '<', () => this.changePage(-1));
-                createGoldButton(this, 270, 500, '>', () => this.changePage(1));
+
                 createGoldButton(this, centerX, 570, 'Back to Menu', () => this.scene.start('StartMenuScene'));
             }
+
             updateAchievementsDisplay() {
+                // Clear existing items before redrawing
                 this.achievementItems.forEach(item => {
                     item.card?.destroy();
                     item.text?.destroy();
@@ -308,75 +355,123 @@
                     }
                 });
                 this.achievementItems = [];
-                const skins = [
-                    { name: 'duck', label: 'Classic Duck', unlocked: true }, { name: 'golden_duck', key: 'score_100' },
-                    { name: 'cyber_duck', key: 'score_500' }, { name: 'rainbow_duck', key: 'score_1000' },
-                    { name: 'fire_duck', key: 'fire_duck' }, { name: 'ice_duck', key: 'ice_duck' },
-                    { name: 'toxic_duck', key: 'toxic_duck' }
+
+                const allSkins = [
+                    { name: 'duck', label: 'Classic Duck', unlocked: true, category: 'og' },
+                    { name: 'golden_duck', key: 'score_100', category: 'og' },
+                    { name: 'cyber_duck', key: 'score_500', category: 'og' },
+                    { name: 'rainbow_duck', key: 'score_1000', category: 'og' },
+                    { name: 'fire_duck', key: 'fire_duck', category: 'og' },
+                    { name: 'ice_duck', key: 'ice_duck', category: 'og' },
+                    { name: 'toxic_duck', key: 'toxic_duck', category: 'og' },
+                    { name: 'decent_duck', label: 'Decent Duck', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_2', label: 'Decent Duck V2', unlocked: true, category: 'decent' }
                 ];
+
+                const skins = allSkins.filter(skin => skin.category === this.category);
+
                 const totalPages = Math.ceil(skins.length / this.itemsPerPage);
+                
+                // Hide pagination buttons if not needed
+                const showPagination = totalPages > 1;
+                this.prevButton.bg.setVisible(showPagination);
+                this.prevButton.text.setVisible(showPagination);
+                this.prevButton.zone.setVisible(showPagination);
+                this.nextButton.bg.setVisible(showPagination);
+                this.nextButton.text.setVisible(showPagination);
+                this.nextButton.zone.setVisible(showPagination);
+
+
                 const startIdx = this.currentPage * this.itemsPerPage;
                 const endIdx = startIdx + this.itemsPerPage;
                 const paginatedSkins = skins.slice(startIdx, endIdx);
+
                 let y = 120;
                 paginatedSkins.forEach(skin => {
                     const achievement = skin.key ? Achievements.achievements[skin.key] : null;
                     const isUnlocked = skin.unlocked || (achievement ? achievement.unlocked : false);
+                    
                     if (!isUnlocked && achievement?.hidden) return;
+
                     const card = createGlassCard(this, 40, y, 280, 100);
                     const descText = achievement ? achievement.description : skin.label;
                     const statusText = isUnlocked ? 'Unlocked' : 'Locked';
                     const fullText = `${descText}\n(${statusText})`;
+
                     const text = this.add.text(180, y + 30, fullText, {
                         fontFamily: Theme.fonts.body,
                         fontSize: `${16 * scaleFactor(this)}px`,
                         color: Theme.colors.text.primary,
                         align: 'center'
                     }).setOrigin(0.5);
+
                     const buttonY = y + 75;
                     const button = createGoldButton(this, 180, buttonY, 'Select', () => { if (isUnlocked) Achievements.setSkin(skin.name); });
+                    
                     if (!isUnlocked) { button.bg.setAlpha(0.3); button.text.setAlpha(0.5); button.zone.disableInteractive(); }
+                    
                     this.achievementItems.push({ card, text, button });
                     y += 120;
                 });
             }
+
             changePage(delta) {
-                const totalSkins = 7;
-                const totalPages = Math.ceil(totalSkins / this.itemsPerPage);
+                const allSkins = [
+                    { name: 'duck', label: 'Classic Duck', unlocked: true, category: 'og' },
+                    { name: 'golden_duck', key: 'score_100', category: 'og' },
+                    { name: 'cyber_duck', key: 'score_500', category: 'og' },
+                    { name: 'rainbow_duck', key: 'score_1000', category: 'og' },
+                    { name: 'fire_duck', key: 'fire_duck', category: 'og' },
+                    { name: 'ice_duck', key: 'ice_duck', category: 'og' },
+                    { name: 'toxic_duck', key: 'toxic_duck', category: 'og' },
+                    { name: 'decent_duck', label: 'Decent Duck', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_2', label: 'Decent Duck V2', unlocked: true, category: 'decent' }
+                ];
+                const skins = allSkins.filter(skin => skin.category === this.category);
+                const totalPages = Math.ceil(skins.length / this.itemsPerPage);
+
+                if (totalPages <= 1) return;
+
                 this.currentPage = (this.currentPage + delta + totalPages) % totalPages;
                 this.updateAchievementsDisplay();
             }
         }
 
+        // LeaderboardScene: Placeholder for Discord leaderboard integration.
         class LeaderboardScene extends Phaser.Scene {
              constructor() { super('LeaderboardScene'); }
              create() {
-                this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
-                const centerX = this.game.config.width / 2;
-                createGlassCard(this, 30, 150, 300, 250);
-                this.add.text(centerX, 100, 'Leaderboard', {
-                    fontFamily: Theme.fonts.headings,
-                    fontSize: `${36 * scaleFactor(this)}px`,
-                    color: Theme.colors.text.primary,
-                }).setOrigin(0.5);
-                const message = !isTelegram ? 'Leaderboards are only\navailable in Telegram!' : 'Check the leaderboard by\nusing /leaderboard\nin the Telegram chat!';
-                this.add.text(centerX, 280, message, {
-                    fontFamily: Theme.fonts.body,
-                    fontSize: `${18 * scaleFactor(this)}px`,
-                    color: Theme.colors.text.secondary,
-                    align: 'center',
-                    wordWrap: { width: 280, useAdvancedWrap: true }
-                }).setOrigin(0.5);
-                createGoldButton(this, centerX, 560, 'Back to Menu', () => this.scene.start('StartMenuScene'));
-            }
+                 this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
+                 const centerX = this.game.config.width / 2;
+                 createGlassCard(this, 30, 150, 300, 250);
+
+                 this.add.text(centerX, 100, 'Leaderboard', {
+                     fontFamily: Theme.fonts.headings,
+                     fontSize: `${36 * scaleFactor(this)}px`,
+                     color: Theme.colors.text.primary,
+                 }).setOrigin(0.5);
+
+                 const message = 'Leaderboards are only\navailable on Discord!';
+                 this.add.text(centerX, 280, message, {
+                     fontFamily: Theme.fonts.body,
+                     fontSize: `${18 * scaleFactor(this)}px`,
+                     color: Theme.colors.text.secondary,
+                     align: 'center',
+                     wordWrap: { width: 280, useAdvancedWrap: true }
+                 }).setOrigin(0.5);
+
+                 createGoldButton(this, centerX, 560, 'Back to Menu', () => this.scene.start('StartMenuScene'));
+             }
         }
 
+        // GameScene: The core gameplay scene.
         class GameScene extends Phaser.Scene {
             constructor() { super('GameScene'); }
             
             create() {
                 const { width, height } = this.game.config;
-                // **FIX: Reverted to original background implementation**
+                
+                // This creates a non-scrolling background that fills the screen.
                 this.background = this.add.sprite(width / 2, height / 2, 'day_sky');
                 this.background.setDisplaySize(width, height);
 
@@ -384,18 +479,24 @@
                 let playerSkin = Achievements.selectedSkin || 'duck';
                 this.player = this.physics.add.sprite(45, 320, playerSkin).setCollideWorldBounds(true);
                 
-                // **FIX: Added conditional scaling for special skins**
+                // Adjust scale for different skins
                 if (['fire_duck', 'ice_duck', 'toxic_duck'].includes(playerSkin)) {
                     this.player.setScale(0.11 * sf);
-                } else {
+                } else if (playerSkin === 'decent_duck' || playerSkin === 'decent_duck_2') {
+                    // Scale this specific skin down by 70% (to 30% of its original scale)
+                    this.player.setScale(0.5 * 0.3 * sf); 
+                }
+                else {
                     this.player.setScale(0.5 * sf);
                 }
                 
                 this.player.setGravityY(800);
                 if (this.player.body) this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
 
+                // Initialize physics groups for all game objects
                 this.peas = this.physics.add.group(); this.coins = this.physics.add.group(); this.stars = this.physics.add.group(); this.rocks = this.physics.add.group(); this.birds = this.physics.add.group(); this.balloons = this.physics.add.group(); this.speedBoosts = this.physics.add.group(); this.shields = this.physics.add.group(); this.peaPods = this.physics.add.group(); this.magnets = this.physics.add.group();
                 
+                // Setup HUD elements
                 const hudStyle = { fontFamily: Theme.fonts.body, fontSize: `${18 * sf}px`, color: '#000000', shadow: { offsetX: 1, offsetY: 1, color: '#fff', blur: 2, fill: true }};
                 const hudStyleSmall = { ...hudStyle, fontSize: `${14 * sf}px`, color: '#333333' };
                 this.scoreLabel = this.add.text(16, 16, 'Score: 0', hudStyle);
@@ -406,12 +507,24 @@
                 this.magnetLabel = this.add.text(width - 16, 52, '', hudStyleSmall).setOrigin(1, 0);
                 this.shieldIcon = this.add.image(width - 24, 80, 'shield_icon').setVisible(false).setScale(0.3 * sf);
 
+                // Input handling
                 this.cursors = this.input.keyboard.createCursorKeys(); this.isTouching = false; this.input.on('pointerdown', () => this.isTouching = true); this.input.on('pointerup', () => this.isTouching = false);
+                
+                // Initialize game state variables
                 this.score = 0; this.level = 1; this.pointsToNextLevel = 100; this.comboCount = 0; this.gameOver = false; this.speedBoostActive = false; this.speedBoostTimer = 0; this.isInvincible = false; this.hasShield = false; this.peaMultiplierActive = false; this.peaMultiplierTimer = 0; this.magnetActive = false; this.magnetTimer = 0; this.dayNightTimer = 0; this.isNight = false;
-                this.peaSpawnTimer = 0; this.starSpawnTimer = 0; this.speedBoostSpawnTimer = 0; this.shieldSpawnTimer = 30; this.peaPodSpawnTimer = 15; this.magnetSpawnTimer = 45; this.coinSpawnTimer = 20;
+                
+                this.obstacleSpawnTimer = 0;
+                this.peaSpawnTimer = 0;
+                this.starSpawnTimer = 0;
+                this.powerUpSpawnTimer = 0; // Single timer for all power-ups
+                this.coinSpawnTimer = 0;
+                
+                // Particle emitters for effects
                 this.powerUpParticles = this.add.particles('particle'); this.powerUpEmitter = this.powerUpParticles.createEmitter({ speed: { min: 30, max: 60 }, angle: { min: 0, max: 360 }, scale: { start: 0.2, end: 0 }, lifespan: 400, quantity: 5, on: false });
                 this.hitParticles = this.add.particles('particle'); this.hitEmitter = this.hitParticles.createEmitter({ speed: { min: 50, max: 100 }, angle: { min: 0, max: 360 }, scale: { start: 0.3, end: 0 }, lifespan: 200, quantity: 8, on: false });
                 this.speedTrail = this.add.particles('particle'); this.trailEmitter = this.speedTrail.createEmitter({ speed: 30, angle: 180, scale: { start: 0.1, end: 0 }, lifespan: 150, quantity: 1, on: false });
+                
+                // Physics overlaps for collisions
                 this.physics.add.overlap(this.player, this.peas, this.collectPea, null, this); this.physics.add.overlap(this.player, this.coins, this.collectCoin, null, this); this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this); this.physics.add.overlap(this.player, this.speedBoosts, this.collectSpeedBoost, null, this); this.physics.add.overlap(this.player, this.shields, this.collectShield, null, this); this.physics.add.overlap(this.player, this.peaPods, this.collectPeaPod, null, this); this.physics.add.overlap(this.player, this.magnets, this.collectMagnet, null, this); this.physics.add.overlap(this.player, [this.rocks, this.birds, this.balloons], this.hitObstacle, null, this);
             }
 
@@ -419,17 +532,27 @@
                 const deltaSeconds = delta / 1000; 
                 if (this.gameOver) return;
 
-                // **FIX: Removed background scrolling logic**
-
+                // Day/Night cycle logic
                 this.dayNightTimer += deltaSeconds; 
                 if (this.dayNightTimer >= 60) { 
                     this.dayNightTimer = 0; 
                     this.isNight = !this.isNight; 
-                    // **FIX: Reverted to original texture switching**
+                    // Switch the texture of the background sprite
                     this.background.setTexture(this.isNight ? 'night_sky' : 'day_sky');
-                    this.background.setDisplaySize(this.game.config.width, this.game.config.height);
                 }
+                
+                // Player controls
                 this.player.body.setVelocityY(this.isTouching || this.cursors.space.isDown ? -400 : this.player.body.velocity.y);
+                
+                // Update power-up timers and effects
+                this.updatePowerUps(deltaSeconds);
+
+                // Move and spawn all objects
+                this.updateObjects(deltaSeconds);
+                this.spawnObjects(deltaSeconds);
+            }
+
+            updatePowerUps(deltaSeconds) {
                 if (this.speedBoostActive) { 
                     this.speedBoostTimer -= deltaSeconds; 
                     if (this.speedBoostTimer <= 0) { 
@@ -463,6 +586,7 @@
                         this.magnetLabel.setText(''); 
                     } else { 
                         this.magnetLabel.setText(`Magnet: ${Math.ceil(this.magnetTimer)}s`); 
+                        // Attract peas towards the player
                         this.peas.getChildren().forEach(pea => { 
                             const distance = Phaser.Math.Distance.Between(this.player.x, this.player.y, pea.x, pea.y); 
                             if (distance <= 150) { 
@@ -474,21 +598,110 @@
                     } 
                 }
                 this.shieldIcon.setVisible(this.hasShield);
-                this.peas.getChildren().forEach(p => { p.x -= Global.currentScrollSpeed * deltaSeconds; if (p.x < -50) p.destroy(); });
-                this.coins.getChildren().forEach(c => { c.x -= Global.currentScrollSpeed * deltaSeconds; if (c.x < -50) c.destroy(); });
-                this.stars.getChildren().forEach(s => { s.x -= Global.currentScrollSpeed * deltaSeconds; if (s.x < -50) s.destroy(); });
-                this.rocks.getChildren().forEach(r => { r.x -= 200 * deltaSeconds; if (r.x < -50) r.destroy(); });
-                this.birds.getChildren().forEach(b => { b.x -= 300 * deltaSeconds; if (b.x < -50) b.destroy(); });
-                this.balloons.getChildren().forEach(b => { b.x -= 150 * deltaSeconds; if (b.x < -50) b.destroy(); });
-                this.speedBoosts.getChildren().forEach(s => { s.x -= Global.currentScrollSpeed * deltaSeconds; if (s.x < -50) s.destroy(); });
-                this.shields.getChildren().forEach(s => { s.x -= Global.currentScrollSpeed * deltaSeconds; if (s.x < -50) s.destroy(); });
-                this.peaPods.getChildren().forEach(p => { p.x -= Global.currentScrollSpeed * deltaSeconds; if (p.x < -50) p.destroy(); });
-                this.magnets.getChildren().forEach(m => { m.x -= Global.currentScrollSpeed * deltaSeconds; if (m.x < -50) m.destroy(); });
-                this.peaSpawnTimer += deltaSeconds; if (this.peaSpawnTimer >= 1.5) { const c = Phaser.Math.Between(2, 4), y = Phaser.Math.Between(45, 595); for (let i = 0; i < c; i++) { const p = this.peas.create(this.game.config.width + 50 + i * 45, y, 'pea'); p.setScale(0.3 * scaleFactor(this)); if (p.body) p.body.setSize(p.width * 0.8, p.height * 0.8); } this.peaSpawnTimer = 0; }
-                if (this.isNight) { this.starSpawnTimer += deltaSeconds; if (this.starSpawnTimer >= 10) { const s = this.stars.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'star'); s.setScale(0.3 * scaleFactor(this)); if (s.body) s.body.setSize(s.width * 0.8, s.height * 0.8); this.starSpawnTimer = 0; } }
-                const obstacleSpawnRate = 0.003 + (this.level - 1) * 0.0005; if (Math.random() < obstacleSpawnRate) { const r = this.rocks.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'rock'); r.setScale(0.3 * scaleFactor(this)); if (r.body) r.body.setSize(r.width * 0.8, r.height * 0.8); } if (Math.random() < obstacleSpawnRate) { const b = this.birds.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'bird'); b.setScale(0.3 * scaleFactor(this)); if (b.body) b.body.setSize(b.width * 0.8, b.height * 0.8); } if (Math.random() < obstacleSpawnRate) { const b = this.balloons.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'balloon'); b.setScale(0.3 * scaleFactor(this)); if (b.body) b.body.setSize(b.width * 0.8, b.height * 0.8); }
-                const powerUpSpawnDelay = 30; this.speedBoostSpawnTimer += deltaSeconds; if (this.speedBoostSpawnTimer >= powerUpSpawnDelay) { const s = this.speedBoosts.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'speed_boost'); s.setScale(0.3 * scaleFactor(this)); if (s.body) s.body.setSize(s.width * 0.8, s.height * 0.8); this.speedBoostSpawnTimer = 0; } this.shieldSpawnTimer += deltaSeconds; if (this.shieldSpawnTimer >= powerUpSpawnDelay) { const s = this.shields.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'shield'); s.setScale(0.3 * scaleFactor(this)); if (s.body) s.body.setSize(s.width * 0.8, s.height * 0.8); this.shieldSpawnTimer = 0; } this.peaPodSpawnTimer += deltaSeconds; if (this.peaPodSpawnTimer >= powerUpSpawnDelay) { const p = this.peaPods.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'pea_pod'); p.setScale(0.3 * scaleFactor(this)); if (p.body) p.body.setSize(p.width * 0.8, p.height * 0.8); this.peaPodSpawnTimer = 0; } this.magnetSpawnTimer += deltaSeconds; if (this.magnetSpawnTimer >= powerUpSpawnDelay) { const m = this.magnets.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'magnet'); m.setScale(0.3 * scaleFactor(this)); if (m.body) m.body.setSize(m.width * 0.8, m.height * 0.8); this.magnetSpawnTimer = 0; } this.coinSpawnTimer += deltaSeconds; if (this.coinSpawnTimer >= 20) { const c = this.coins.create(this.game.config.width + 50, Phaser.Math.Between(45, 595), 'coin'); c.setScale(0.3 * scaleFactor(this)); if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8); this.coinSpawnTimer = 0; }
             }
+
+            updateObjects(deltaSeconds) {
+                // Move all objects across the screen and destroy them when they go off-screen
+                const moveObject = (obj) => {
+                    obj.x -= Global.currentScrollSpeed * deltaSeconds;
+                    if (obj.x < -50) obj.destroy();
+                };
+                this.peas.getChildren().forEach(moveObject);
+                this.coins.getChildren().forEach(moveObject);
+                this.stars.getChildren().forEach(moveObject);
+                this.rocks.getChildren().forEach(moveObject);
+                this.birds.getChildren().forEach(moveObject);
+                this.balloons.getChildren().forEach(moveObject);
+                this.speedBoosts.getChildren().forEach(moveObject);
+                this.shields.getChildren().forEach(moveObject);
+                this.peaPods.getChildren().forEach(moveObject);
+                this.magnets.getChildren().forEach(moveObject);
+            }
+
+            spawnObjects(deltaSeconds) {
+                const { width, height } = this.game.config;
+                const sf = scaleFactor(this);
+
+                // Spawn peas
+                this.peaSpawnTimer += deltaSeconds; 
+                if (this.peaSpawnTimer >= 1.5) { 
+                    const count = Phaser.Math.Between(2, 4);
+                    const y = Phaser.Math.Between(45, 595); 
+                    for (let i = 0; i < count; i++) { 
+                        const p = this.peas.create(width + 50 + i * 45, y, 'pea'); 
+                        p.setScale(0.3 * sf); 
+                        if (p.body) p.body.setSize(p.width * 0.8, p.height * 0.8); 
+                    } 
+                    this.peaSpawnTimer = 0; 
+                }
+
+                // Spawn stars at night
+                if (this.isNight) { 
+                    this.starSpawnTimer += deltaSeconds; 
+                    if (this.starSpawnTimer >= 10) { 
+                        const s = this.stars.create(width + 50, Phaser.Math.Between(45, 595), 'star'); 
+                        s.setScale(0.3 * sf); 
+                        if (s.body) s.body.setSize(s.width * 0.8, s.height * 0.8); 
+                        this.starSpawnTimer = 0; 
+                    } 
+                }
+
+                // Spawn obstacles based on a timer for consistency.
+                this.obstacleSpawnTimer += deltaSeconds;
+                const obstacleSpawnInterval = Math.max(0.5, 2.0 - (this.level * 0.1)); // Spawn faster at higher levels
+                if (this.obstacleSpawnTimer >= obstacleSpawnInterval) {
+                    const obstacleType = Phaser.Math.RND.pick(['rock', 'bird', 'balloon']);
+                    const obstacle = this.physics.add.sprite(width + 50, Phaser.Math.Between(45, 595), obstacleType);
+                    obstacle.setScale(0.3 * sf);
+                    if (obstacle.body) obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8);
+                    
+                    if (obstacleType === 'rock') this.rocks.add(obstacle);
+                    if (obstacleType === 'bird') this.birds.add(obstacle);
+                    if (obstacleType === 'balloon') this.balloons.add(obstacle);
+
+                    this.obstacleSpawnTimer = 0;
+                }
+                
+                this.powerUpSpawnTimer += deltaSeconds;
+                if (this.powerUpSpawnTimer >= 30) {
+                    const powerUpTypes = ['speed_boost', 'shield', 'pea_pod', 'magnet'];
+                    const randomType = Phaser.Math.RND.pick(powerUpTypes);
+                    let powerUp;
+                    const y = Phaser.Math.Between(45, 595);
+                    const x = width + 50;
+
+                    switch (randomType) {
+                        case 'speed_boost':
+                            powerUp = this.speedBoosts.create(x, y, 'speed_boost');
+                            break;
+                        case 'shield':
+                            powerUp = this.shields.create(x, y, 'shield');
+                            break;
+                        case 'pea_pod':
+                            powerUp = this.peaPods.create(x, y, 'pea_pod');
+                            break;
+                        case 'magnet':
+                            powerUp = this.magnets.create(x, y, 'magnet');
+                            break;
+                    }
+                    
+                    if (powerUp) {
+                        powerUp.setScale(0.3 * sf);
+                        if (powerUp.body) powerUp.body.setSize(powerUp.width * 0.8, powerUp.height * 0.8);
+                    }
+                    
+                    this.powerUpSpawnTimer = 0;
+                }
+
+                this.coinSpawnTimer += deltaSeconds;
+                if (this.coinSpawnTimer >= 25) {
+                    const c = this.coins.create(width + 50, Phaser.Math.Between(45, 595), 'coin');
+                    c.setScale(0.3 * sf);
+                    if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8);
+                    this.coinSpawnTimer = 0;
+                }
+            }
+
             checkLevelUp() { if (this.score >= this.pointsToNextLevel) { this.level++; this.pointsToNextLevel += 100 * this.level; this.levelLabel.setText(`Level: ${this.level}`); const t = this.add.text(180, 320, 'Level Up!', { fontFamily: Theme.fonts.body, fontSize: '24px', color: '#ffd700', shadow: { offsetX: 2, offsetY: 2, color: '#000', blur: 4, fill: true } }).setOrigin(0.5).setDepth(100).setScale(scaleFactor(this)); this.time.delayedCall(1000, () => t.destroy()); } }
             collectPea(p, pea) { if (this.gameOver) return; this.comboCount++; const m = this.comboCount >= 5 ? 1.5 : 1; let b = (this.peaMultiplierActive ? 2 : 1) * m; if (this.isNight) b *= 2; this.score += b; this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); this.comboLabel.setText(`Combo: ${this.comboCount}`); this.checkLevelUp(); pea.destroy(); }
             collectCoin(p, coin) { if (this.gameOver) return; this.comboCount++; const m = this.comboCount >= 5 ? 1.5 : 1; let b = 20 * m; if (this.isNight) b *= 2; this.score += b; this.scoreLabel.setText(`Score: ${Math.floor(this.score)}`); this.comboLabel.setText(`Combo: ${this.comboCount}`); this.checkLevelUp(); coin.destroy(); }
@@ -497,9 +710,29 @@
             collectShield(p, s) { if (this.gameOver) return; this.hasShield = true; this.powerUpEmitter.emitParticleAt(s.x, s.y); s.destroy(); }
             collectPeaPod(p, pp) { if (this.gameOver) return; this.peaMultiplierActive = true; this.peaMultiplierTimer = 30; this.powerUpEmitter.emitParticleAt(pp.x, pp.y); pp.destroy(); }
             collectMagnet(p, m) { if (this.gameOver) return; this.magnetActive = true; this.magnetTimer = 30; this.powerUpEmitter.emitParticleAt(m.x, m.y); m.destroy(); }
-            hitObstacle(p, o) { if (this.gameOver) return; if (this.isInvincible) { this.hitEmitter.emitParticleAt(o.x, o.y); o.destroy(); } else if (this.hasShield) { this.hasShield = false; this.hitEmitter.emitParticleAt(o.x, o.y); o.destroy(); } else { this.gameOver = true; this.score = Math.floor(this.score); let hs = parseInt(localStorage.getItem("duckJoyrideHighScore") || 0); if (this.score > hs) localStorage.setItem("duckJoyrideHighScore", this.score); Achievements.checkAchievements(this.score); Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths + 1, this.isNight); if (this.score < 100) Achievements.consecutiveDeaths++; else Achievements.consecutiveDeaths = 0; this.scene.start('GameOverScene', { finalScore: this.score }); } this.comboCount = 0; this.comboLabel.setText(`Combo: ${this.comboCount}`); }
+            
+            hitObstacle(p, o) { 
+                if (this.gameOver) return; 
+                if (this.isInvincible) { 
+                    this.hitEmitter.emitParticleAt(o.x, o.y); o.destroy(); 
+                } else if (this.hasShield) { 
+                    this.hasShield = false; this.hitEmitter.emitParticleAt(o.x, o.y); o.destroy(); 
+                } else { 
+                    this.gameOver = true; 
+                    this.score = Math.floor(this.score); 
+                    let hs = parseInt(localStorage.getItem("duckJoyrideHighScore") || 0); 
+                    if (this.score > hs) localStorage.setItem("duckJoyrideHighScore", this.score); 
+                    Achievements.checkAchievements(this.score); 
+                    Achievements.checkHiddenUnlocks(this.comboCount, Achievements.consecutiveDeaths + 1, this.isNight); 
+                    if (this.score < 100) Achievements.consecutiveDeaths++; else Achievements.consecutiveDeaths = 0; 
+                    this.scene.start('GameOverScene', { finalScore: this.score }); 
+                } 
+                this.comboCount = 0; 
+                this.comboLabel.setText(`Combo: ${this.comboCount}`); 
+            }
         }
 
+        // GameOverScene: Displays the final score and options.
         class GameOverScene extends Phaser.Scene {
             constructor() { super('GameOverScene'); }
             init(data) { this.finalScore = data.finalScore || 0; }
@@ -507,16 +740,19 @@
                 this.add.image(this.game.config.width / 2, this.game.config.height / 2, 'bg_gradient');
                 const centerX = this.game.config.width / 2;
                 createGlassCard(this, 30, 150, 300, 250);
+
                 this.add.text(centerX, 200, 'Game Over', {
                     fontFamily: Theme.fonts.headings,
                     fontSize: `${48 * scaleFactor(this)}px`,
                     color: Theme.colors.text.primary,
                 }).setOrigin(0.5);
+
                 this.add.text(centerX, 280, `Final Score: ${this.finalScore}`, {
                     fontFamily: Theme.fonts.body,
                     fontSize: `${24 * scaleFactor(this)}px`,
                     color: Theme.colors.text.secondary,
                 }).setOrigin(0.5);
+
                 createGoldButton(this, centerX, 560, 'Return to Menu', () => {
                     Achievements.resetSession();
                     this.scene.start('StartMenuScene');
