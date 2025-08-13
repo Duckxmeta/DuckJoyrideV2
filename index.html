@@ -170,7 +170,7 @@
                  } else {
                      this.saveAchievements();
                  }
-                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck', 'decent_duck', 'decent_duck_2', 'decent_duck_3', 'decent_duck_4', 'decent_duck_5', 'decent_duck_6', 'decent_duck_7', 'decent_duck_8', 'decent_duck_9'];
+                 const validSkins = ['duck', 'golden_duck', 'cyber_duck', 'rainbow_duck', 'fire_duck', 'ice_duck', 'toxic_duck', 'decent_duck', 'decent_duck_2', 'decent_duck_3', 'decent_duck_4', 'decent_duck_5', 'decent_duck_6', 'decent_duck_7', 'decent_duck_8', 'decent_duck_9', 'decent_duck_10'];
                  this.selectedSkin = validSkins.includes(this.selectedSkin) ? this.selectedSkin : 'duck';
              },
              saveAchievements() {
@@ -232,6 +232,7 @@
                 this.load.image('decent_duck_7', 'https://i.imgur.com/YPxFYPk.png');
                 this.load.image('decent_duck_8', 'https://i.imgur.com/nNGLub1.png');
                 this.load.image('decent_duck_9', 'https://i.imgur.com/aMIzw1g.png');
+                this.load.image('decent_duck_10', 'https://i.imgur.com/L5IXyoy.png');
                 this.load.image('golden_duck', 'https://i.imgur.com/htlvtIs.png');
                 this.load.image('cyber_duck', 'https://i.imgur.com/mdhDPsN.png');
                 this.load.image('rainbow_duck', 'https://i.imgur.com/yz3RYaz.png');
@@ -382,7 +383,8 @@
                     { name: 'decent_duck_6', label: 'Decent Duck #128', unlocked: true, category: 'decent' },
                     { name: 'decent_duck_7', label: 'Decent Duck #123', unlocked: true, category: 'decent' },
                     { name: 'decent_duck_8', label: 'Decent Duck #477', unlocked: true, category: 'decent' },
-                    { name: 'decent_duck_9', label: 'Decent Duck #135', unlocked: true, category: 'decent' }
+                    { name: 'decent_duck_9', label: 'Decent Duck #135', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_10', label: 'Decent Duck #291', unlocked: true, category: 'decent' }
                 ];
 
                 const skins = allSkins.filter(skin => skin.category === this.category);
@@ -449,7 +451,8 @@
                     { name: 'decent_duck_6', label: 'Decent Duck #128', unlocked: true, category: 'decent' },
                     { name: 'decent_duck_7', label: 'Decent Duck #123', unlocked: true, category: 'decent' },
                     { name: 'decent_duck_8', label: 'Decent Duck #477', unlocked: true, category: 'decent' },
-                    { name: 'decent_duck_9', label: 'Decent Duck #135', unlocked: true, category: 'decent' }
+                    { name: 'decent_duck_9', label: 'Decent Duck #135', unlocked: true, category: 'decent' },
+                    { name: 'decent_duck_10', label: 'Decent Duck #291', unlocked: true, category: 'decent' }
                 ];
                 const skins = allSkins.filter(skin => skin.category === this.category);
                 const totalPages = Math.ceil(skins.length / this.itemsPerPage);
