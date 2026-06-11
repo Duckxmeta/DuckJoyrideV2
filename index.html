@@ -445,6 +445,42 @@
             right: 6px;
         }
 
+        .trail-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 4px;
+        }
+        .trail-thumb-smoke {
+            background: radial-gradient(circle, #b0b0b0 10%, #555555 60%, #1e1e24 100%);
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.1);
+        }
+        .trail-thumb-fire {
+            background: radial-gradient(circle, #ffffff 10%, #ff007f 50%, #ff5e00 100%);
+            box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+            border-color: rgba(255, 0, 127, 0.4);
+        }
+        .trail-thumb-rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);
+            border-color: rgba(0, 242, 254, 0.3);
+        }
+        .trail-thumb-matrix {
+            background: #000000;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: 900;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00;
+        }
+
         /* HUD Overlay Styling */
         #hud-overlay {
             position: absolute;
@@ -646,12 +682,17 @@
             <div id="screen-shop" class="ui-screen hidden">
                 <h2 class="screen-title font-orbitron" style="border-bottom-color: #ffd700; box-shadow: 0 4px 10px -5px var(--color-gold-glow);">COSMETIC SHOP</h2>
                 
-                <div class="high-score-container font-inter" style="border-color: rgba(255, 215, 0, 0.3);">
+                <div class="high-score-container font-inter" style="border-color: rgba(255, 215, 0, 0.3); margin-bottom: 10px;">
                     <span>YOUR COINS</span>
                     <span id="shop-coin-balance" class="high-score-val font-orbitron" style="color: #ffd700; text-shadow: 0 0 10px var(--color-gold-glow);">0</span>
                 </div>
 
-                <div class="skins-grid-container" style="height: 280px;">
+                <div class="tabs" style="width: 90%; margin-bottom: 10px;">
+                    <button id="shop-tab-skins" class="tab-btn active font-orbitron">SKINS</button>
+                    <button id="shop-tab-trails" class="tab-btn font-orbitron">TRAILS</button>
+                </div>
+
+                <div class="skins-grid-container" style="height: 250px;">
                     <div id="shop-grid" class="skins-grid">
                         <!-- Filled dynamically by JavaScript -->
                     </div>
@@ -783,12 +824,22 @@
             totalCoinsBalance: 0,
             unlockedSkins: ['duck'],
             equippedSkin: 'duck',
+            unlockedTrails: ['smoke'],
+            equippedTrail: 'smoke',
+            activeTab: 'skins',
             
             skins: [
                 { name: 'duck', label: 'Classic Duck', price: 0, image: 'Assets4game2/duck-removebg-preview.png', desc: 'Standard issue yellow duck.' },
-                { name: 'cyber_duck', label: 'Cyber Duck', price: 200, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.' },
-                { name: 'golden_duck', label: 'Golden Duck', price: 500, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.' },
-                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1000, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' }
+                { name: 'cyber_duck', label: 'Cyber Duck', price: 250, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.' },
+                { name: 'golden_duck', label: 'Golden Duck', price: 600, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.' },
+                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1200, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' }
+            ],
+            
+            trails: [
+                { name: 'smoke', label: 'Standard Smoke', price: 0, desc: 'Simple grey exhaust bubbles.' },
+                { name: 'fire', label: 'Neon Fire', price: 300, desc: 'High-intensity magenta flame.' },
+                { name: 'rainbow', label: 'Rainbow Trail', price: 700, desc: 'Flowing spectrum of neon colors.' },
+                { name: 'matrix', label: 'Web3 Matrix Glow', price: 1500, desc: 'Cascading green binary data stream.' }
             ],
             
             loadData() {
@@ -812,6 +863,20 @@
                 } else {
                     this.equippedSkin = 'duck';
                 }
+
+                const savedUnlockedTrails = localStorage.getItem("duckJoyrideUnlockedTrails");
+                if (savedUnlockedTrails) {
+                    this.unlockedTrails = JSON.parse(savedUnlockedTrails) || ['smoke'];
+                } else {
+                    this.unlockedTrails = ['smoke'];
+                }
+
+                const savedEquippedTrail = localStorage.getItem("duckJoyrideEquippedTrail");
+                if (savedEquippedTrail) {
+                    this.equippedTrail = savedEquippedTrail;
+                } else {
+                    this.equippedTrail = 'smoke';
+                }
                 
                 // Sync equipped skin to selectedSkin for Phaser textures
                 Achievements.selectedSkin = this.equippedSkin;
@@ -821,6 +886,8 @@
                 localStorage.setItem("duckJoyrideCoins", this.totalCoinsBalance);
                 localStorage.setItem("duckJoyrideUnlockedSkins", JSON.stringify(this.unlockedSkins));
                 localStorage.setItem("duckJoyrideEquippedSkin", this.equippedSkin);
+                localStorage.setItem("duckJoyrideUnlockedTrails", JSON.stringify(this.unlockedTrails));
+                localStorage.setItem("duckJoyrideEquippedTrail", this.equippedTrail);
                 
                 Achievements.selectedSkin = this.equippedSkin;
             },
@@ -844,6 +911,26 @@
             equipSkin(name) {
                 if (this.unlockedSkins.includes(name)) {
                     this.equippedSkin = name;
+                    this.saveData();
+                    return true;
+                }
+                return false;
+            },
+
+            buyTrail(name) {
+                const trail = this.trails.find(t => t.name === name);
+                if (trail && !this.unlockedTrails.includes(name) && this.totalCoinsBalance >= trail.price) {
+                    this.totalCoinsBalance -= trail.price;
+                    this.unlockedTrails.push(name);
+                    this.saveData();
+                    return true;
+                }
+                return false;
+            },
+            
+            equipTrail(name) {
+                if (this.unlockedTrails.includes(name)) {
+                    this.equippedTrail = name;
                     this.saveData();
                     return true;
                 }
@@ -875,6 +962,88 @@
             ctx.beginPath();
             ctx.arc(r, r, r, 0, Math.PI * 2);
             ctx.fill();
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        function createSmokeParticleTexture(scene, key, size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const r = size / 2;
+            
+            const grad = ctx.createRadialGradient(r, r, size * 0.1, r, r, r);
+            grad.addColorStop(0, 'rgba(220, 220, 220, 0.9)');
+            grad.addColorStop(0.4, 'rgba(140, 140, 140, 0.4)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(r, r, r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        function createFireParticleTexture(scene, key, size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const r = size / 2;
+            
+            const grad = ctx.createRadialGradient(r, r, size * 0.1, r, r, r);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.25, '#ff007f'); 
+            grad.addColorStop(0.6, '#ff5e00');  
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(r, r, r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        function createWhiteGlowParticleTexture(scene, key, size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const r = size / 2;
+            
+            const grad = ctx.createRadialGradient(r, r, size * 0.1, r, r, r);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.35, 'rgba(255, 255, 255, 0.85)');
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(r, r, r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        function createMatrixParticleTexture(scene, key, size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            
+            const chars = ['0', '1'];
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            
+            ctx.shadowColor = '#00ff00';
+            ctx.shadowBlur = 4;
+            ctx.fillStyle = '#00ff00';
+            ctx.font = 'bold 12px monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(char, size / 2, size / 2);
             
             scene.textures.addCanvas(key, canvas);
         }
@@ -1124,6 +1293,10 @@
                 this.textures.addCanvas('bg_gradient', canvas);
 
                 // Create procedural visual textures
+                createSmokeParticleTexture(this, 'smoke_particle', 16);
+                createFireParticleTexture(this, 'fire_particle', 16);
+                createWhiteGlowParticleTexture(this, 'rainbow_particle', 16);
+                createMatrixParticleTexture(this, 'matrix_particle', 16);
                 createNeonParticleTexture(this, 'trail_particle', 16, '#00f2fe'); 
                 createNeonParticleTexture(this, 'coin_particle', 16, '#ffd700'); 
                 createNeonParticleTexture(this, 'shield_particle', 20, '#00f2fe'); 
@@ -1274,18 +1447,7 @@
                 this.scientistSpawnTimer = 0;
 
                 // LAYER 5: Jetpack Bubble Trail Emitter
-                this.trailParticles = this.add.particles('trail_particle').setDepth(5);
-                this.jetpackEmitter = this.trailParticles.createEmitter({
-                    speedY: { min: -10, max: 40 },
-                    speedX: { min: -140, max: -40 },
-                    angle: { min: 165, max: 195 },
-                    scale: { start: 0.9, end: 0.1 },
-                    alpha: { start: 0.7, end: 0 },
-                    lifespan: 500,
-                    frequency: -1, 
-                    gravityY: 60,
-                    blendMode: 'ADD'
-                });
+                this.updateJetpackTrail();
 
                 // Collisions/Overlaps
                 this.physics.add.overlap(this.player, this.peas, this.collectPea, null, this); 
@@ -1315,6 +1477,78 @@
                 if (this.player.body) {
                     this.player.body.setSize(this.player.width * 0.8, this.player.height * 0.8);
                 }
+            }
+
+            updateJetpackTrail() {
+                // Destroy old particle manager and emitter if they exist
+                if (this.jetpackEmitter) {
+                    this.jetpackEmitter.stop();
+                }
+                if (this.trailParticles) {
+                    this.trailParticles.destroy();
+                }
+
+                const trailType = CosmeticShop.equippedTrail || 'smoke';
+                let particleKey = 'smoke_particle';
+                let emitterConfig = {};
+
+                if (trailType === 'smoke') {
+                    particleKey = 'smoke_particle';
+                    emitterConfig = {
+                        speedY: { min: -10, max: 40 },
+                        speedX: { min: -140, max: -40 },
+                        angle: { min: 165, max: 195 },
+                        scale: { start: 0.9, end: 0.1 },
+                        alpha: { start: 0.7, end: 0 },
+                        lifespan: 500,
+                        frequency: -1, 
+                        gravityY: 60,
+                        blendMode: 'NORMAL'
+                    };
+                } else if (trailType === 'fire') {
+                    particleKey = 'fire_particle';
+                    emitterConfig = {
+                        speedY: { min: -20, max: 60 },
+                        speedX: { min: -180, max: -60 },
+                        angle: { min: 160, max: 200 },
+                        scale: { start: 1.0, end: 0.1 },
+                        alpha: { start: 0.9, end: 0 },
+                        lifespan: 400,
+                        frequency: -1,
+                        gravityY: 100,
+                        blendMode: 'ADD'
+                    };
+                } else if (trailType === 'rainbow') {
+                    particleKey = 'rainbow_particle';
+                    emitterConfig = {
+                        speedY: { min: -15, max: 45 },
+                        speedX: { min: -150, max: -50 },
+                        angle: { min: 165, max: 195 },
+                        scale: { start: 0.8, end: 0.15 },
+                        alpha: { start: 0.8, end: 0 },
+                        lifespan: 550,
+                        frequency: -1,
+                        gravityY: 40,
+                        blendMode: 'ADD',
+                        tint: [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x8b00ff]
+                    };
+                } else if (trailType === 'matrix') {
+                    particleKey = 'matrix_particle';
+                    emitterConfig = {
+                        speedY: { min: 10, max: 50 },
+                        speedX: { min: -120, max: -30 },
+                        angle: { min: 170, max: 210 },
+                        scale: { start: 0.9, end: 0.3 },
+                        alpha: { start: 1.0, end: 0 },
+                        lifespan: 700,
+                        frequency: -1,
+                        gravityY: 120,
+                        blendMode: 'ADD'
+                    };
+                }
+
+                this.trailParticles = this.add.particles(particleKey).setDepth(5);
+                this.jetpackEmitter = this.trailParticles.createEmitter(emitterConfig);
             }
 
             startGame() {
@@ -1370,6 +1604,7 @@
                 
                 
                 this.updatePlayerSkin();
+                this.updateJetpackTrail();
                 
                 this.isPlaying = true;
                 updateHUD(this);
@@ -2033,54 +2268,114 @@
             // Sync coin display
             document.getElementById('shop-coin-balance').innerText = CosmeticShop.totalCoinsBalance;
             
-            CosmeticShop.skins.forEach(skin => {
-                const isUnlocked = CosmeticShop.unlockedSkins.includes(skin.name);
-                const isEquipped = CosmeticShop.equippedSkin === skin.name;
-                
-                const card = document.createElement('div');
-                card.className = `skin-card ${isEquipped ? 'selected' : ''}`;
-                
-                let buttonHTML = '';
-                if (isEquipped) {
-                    buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
-                } else if (isUnlocked) {
-                    buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
-                } else {
-                    const canAfford = CosmeticShop.totalCoinsBalance >= skin.price;
-                    buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${skin.price}</button>`;
-                }
-                
-                card.innerHTML = `
-                    <img class="skin-preview" src="${skin.image}" alt="${skin.label}">
-                    <div class="skin-name">${skin.label}</div>
-                    <div class="skin-desc" style="font-size: 7.5px;">${skin.desc}</div>
-                    <div style="width: 100%; margin-top: 4px;">${buttonHTML}</div>
-                `;
-                
-                if (!isEquipped) {
-                    if (isUnlocked) {
-                        card.querySelector('.btn-equip').addEventListener('click', () => {
-                            CosmeticShop.equipSkin(skin.name);
-                            populateShopGrid();
-                            
-                            const gameScene = game.scene.keys.GameScene;
-                            if (gameScene) {
-                                gameScene.updatePlayerSkin();
-                            }
-                        });
+            const activeTab = CosmeticShop.activeTab || 'skins';
+            
+            if (activeTab === 'skins') {
+                CosmeticShop.skins.forEach(skin => {
+                    const isUnlocked = CosmeticShop.unlockedSkins.includes(skin.name);
+                    const isEquipped = CosmeticShop.equippedSkin === skin.name;
+                    
+                    const card = document.createElement('div');
+                    card.className = `skin-card ${isEquipped ? 'selected' : ''}`;
+                    
+                    let buttonHTML = '';
+                    if (isEquipped) {
+                        buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
+                    } else if (isUnlocked) {
+                        buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
                     } else {
-                        const buyBtn = card.querySelector('.btn-buy');
-                        if (buyBtn && CosmeticShop.totalCoinsBalance >= skin.price) {
-                            buyBtn.addEventListener('click', () => {
-                                CosmeticShop.buySkin(skin.name);
+                        const canAfford = CosmeticShop.totalCoinsBalance >= skin.price;
+                        buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${skin.price}</button>`;
+                    }
+                    
+                    card.innerHTML = `
+                        <img class="skin-preview" src="${skin.image}" alt="${skin.label}">
+                        <div class="skin-name">${skin.label}</div>
+                        <div class="skin-desc" style="font-size: 7.5px;">${skin.desc}</div>
+                        <div style="width: 100%; margin-top: 4px;">${buttonHTML}</div>
+                    `;
+                    
+                    if (!isEquipped) {
+                        if (isUnlocked) {
+                            card.querySelector('.btn-equip').addEventListener('click', () => {
+                                CosmeticShop.equipSkin(skin.name);
                                 populateShopGrid();
+                                
+                                const gameScene = game.scene.keys.GameScene;
+                                if (gameScene) {
+                                    gameScene.updatePlayerSkin();
+                                }
                             });
+                        } else {
+                            const buyBtn = card.querySelector('.btn-buy');
+                            if (buyBtn && CosmeticShop.totalCoinsBalance >= skin.price) {
+                                buyBtn.addEventListener('click', () => {
+                                    CosmeticShop.buySkin(skin.name);
+                                    populateShopGrid();
+                                });
+                            }
                         }
                     }
-                }
-                
-                grid.appendChild(card);
-            });
+                    
+                    grid.appendChild(card);
+                });
+            } else if (activeTab === 'trails') {
+                CosmeticShop.trails.forEach(trail => {
+                    const isUnlocked = CosmeticShop.unlockedTrails.includes(trail.name);
+                    const isEquipped = CosmeticShop.equippedTrail === trail.name;
+                    
+                    const card = document.createElement('div');
+                    card.className = `skin-card ${isEquipped ? 'selected' : ''}`;
+                    
+                    let buttonHTML = '';
+                    if (isEquipped) {
+                        buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
+                    } else if (isUnlocked) {
+                        buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
+                    } else {
+                        const canAfford = CosmeticShop.totalCoinsBalance >= trail.price;
+                        buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${trail.price}</button>`;
+                    }
+                    
+                    let previewHTML = '';
+                    if (trail.name === 'matrix') {
+                        previewHTML = `<div class="trail-thumb trail-thumb-matrix">01</div>`;
+                    } else {
+                        previewHTML = `<div class="trail-thumb trail-thumb-${trail.name}"></div>`;
+                    }
+                    
+                    card.innerHTML = `
+                        ${previewHTML}
+                        <div class="skin-name">${trail.label}</div>
+                        <div class="skin-desc" style="font-size: 7.5px;">${trail.desc}</div>
+                        <div style="width: 100%; margin-top: 4px;">${buttonHTML}</div>
+                    `;
+                    
+                    if (!isEquipped) {
+                        if (isUnlocked) {
+                            card.querySelector('.btn-equip').addEventListener('click', () => {
+                                CosmeticShop.equipTrail(trail.name);
+                                populateShopGrid();
+                                
+                                const gameScene = game.scene.keys.GameScene;
+                                if (gameScene) {
+                                    gameScene.updateJetpackTrail();
+                                }
+                            });
+                        } else {
+                            const buyBtn = card.querySelector('.btn-buy');
+                            if (buyBtn && CosmeticShop.totalCoinsBalance >= trail.price) {
+                                buyBtn.addEventListener('click', () => {
+                                    CosmeticShop.buyTrail(trail.name);
+                                    populateShopGrid();
+                                });
+                            }
+                        }
+                    }
+                    
+                    grid.appendChild(card);
+                });
+            }
         }
 
         window.onGameLoaded = function() {
@@ -2117,12 +2412,29 @@
 
         // Shop button click
         document.getElementById('btn-shop').addEventListener('click', () => {
+            CosmeticShop.activeTab = 'skins';
+            document.getElementById('shop-tab-skins').classList.add('active');
+            document.getElementById('shop-tab-trails').classList.remove('active');
             populateShopGrid();
             showScreen('shop');
         });
 
         document.getElementById('btn-shop-back').addEventListener('click', () => {
             showScreen('start');
+        });
+
+        document.getElementById('shop-tab-skins').addEventListener('click', (e) => {
+            document.getElementById('shop-tab-trails').classList.remove('active');
+            e.target.classList.add('active');
+            CosmeticShop.activeTab = 'skins';
+            populateShopGrid();
+        });
+
+        document.getElementById('shop-tab-trails').addEventListener('click', (e) => {
+            document.getElementById('shop-tab-skins').classList.remove('active');
+            e.target.classList.add('active');
+            CosmeticShop.activeTab = 'trails';
+            populateShopGrid();
         });
 
         document.getElementById('tab-og').addEventListener('click', (e) => {
