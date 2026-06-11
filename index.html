@@ -1272,8 +1272,9 @@
                 this.player.setPosition(80, 320);
                 this.player.body.setVelocity(0, 0);
                 this.player.body.setAccelerationY(0);
-                this.player.setGravityY(950); // High gravity feel
-                this.player.body.setMaxVelocity(300, 420); // Clamp maximum rise and fall speeds
+                this.player.setGravityY(680); // Lower gravity for smooth, gentler fall
+                this.player.body.setMaxVelocity(500, 290); // Clamp maximum rise and fall speeds for floaty feel
+                
                 
                 this.updatePlayerSkin();
                 
@@ -1375,7 +1376,8 @@
                 // Snappy Jetpack forces (acceleration-based vertical flight)
                 const isFlapping = this.isTouching || this.cursors.space.isDown;
                 if (isFlapping) {
-                    this.player.body.setAccelerationY(-1950); // snap upward thrust
+                    this.player.body.setAccelerationY(-1380); // steady, controllable lift
+                    
                     
                     // Emit flight bubble particles
                     if (this.player.body.velocity.y < 0) {
