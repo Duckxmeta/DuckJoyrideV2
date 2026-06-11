@@ -1268,12 +1268,13 @@
                 this.peaPods.clear(true, true);
                 this.magnets.clear(true, true);
 
-                // Snappy Jetpack Physics (set constraints on arcade body)
+                // Original Jetpack Physics (set constraints on arcade body)
                 this.player.setPosition(80, 320);
                 this.player.body.setVelocity(0, 0);
                 this.player.body.setAccelerationY(0);
-                this.player.setGravityY(680); // Lower gravity for smooth, gentler fall
-                this.player.body.setMaxVelocity(500, 290); // Clamp maximum rise and fall speeds for floaty feel
+                this.player.setGravityY(800); // Original gravity feel
+                this.player.body.setMaxVelocity(10000, 10000); // Reset max velocity constraints to original
+                
                 
                 
                 this.updatePlayerSkin();
@@ -1373,18 +1374,16 @@
                     this.background.setTexture(this.backgrounds[this.currentBackgroundIndex]);
                 }
 
-                // Snappy Jetpack forces (acceleration-based vertical flight)
+                // Original Jetpack controls (direct velocity manipulation)
                 const isFlapping = this.isTouching || this.cursors.space.isDown;
                 if (isFlapping) {
-                    this.player.body.setAccelerationY(-1380); // steady, controllable lift
-                    
+                    this.player.body.setVelocityY(-400); // Original snappy lift velocity
                     
                     // Emit flight bubble particles
                     if (this.player.body.velocity.y < 0) {
                         this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
                     }
                 } else {
-                    this.player.body.setAccelerationY(0); // fall via gravity
                     this.jetpackEmitter.stop();
                 }
 
