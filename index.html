@@ -232,7 +232,7 @@
             letter-spacing: 1px;
         }
         .stat-val {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
         }
@@ -479,9 +479,13 @@
             font-weight: 700;
         }
         #hud-score {
-            font-size: 18px;
+            font-size: 17px;
             color: #fff;
             text-shadow: 0 0 8px var(--color-primary-glow), 0 0 15px var(--color-primary-glow);
+        }
+        #hud-coins {
+            font-size: 13px;
+            text-shadow: 0 0 8px var(--color-gold-glow);
         }
         #hud-level {
             color: var(--color-text-secondary);
@@ -563,6 +567,7 @@
         <div id="hud-overlay" class="hud-container hidden">
             <div class="hud-top-left">
                 <div id="hud-score" class="hud-value font-orbitron">SCORE: 0</div>
+                <div id="hud-coins" class="hud-value font-orbitron" style="color: #ffd700;">COINS: 0</div>
                 <div id="hud-level" class="hud-value font-inter">Level 1</div>
                 <div id="hud-combo" class="hud-value font-inter hidden">Combo: 0</div>
             </div>
@@ -610,9 +615,9 @@
                 <div class="screen-content font-inter">
                     <p><span class="highlight">TAP SCREEN</span> or <span class="highlight">PRESS SPACEBAR</span> to fly upwards.</p>
                     <p>Release to descend.</p>
-                    <p>Avoid <span class="warning">ROCKS</span>, <span class="warning">BIRDS</span>, and <span class="warning">BALLOONS</span>.</p>
-                    <p>Collect <span class="highlight">PEAS</span>, <span class="highlight">COINS</span>, and <span class="highlight">STARS</span>.</p>
-                    <p>Grab power-ups for Speed Boost, Magnet, Shield, and Multipliers.</p>
+                    <p>Avoid <span class="warning">ROCKS</span>, <span class="warning">BIRDS</span>, <span class="warning">BALLOONS</span>, <span class="warning">ZAPPERS</span>, and <span class="warning">MISSILES</span>.</p>
+                    <p>Collect <span class="highlight">PEAS</span>, <span class="highlight">COINS</span> (spawning in waves/grids), and <span class="highlight">STARS</span>.</p>
+                    <p>Scientists run on the ground below for visual flavor!</p>
                 </div>
                 
                 <button id="btn-how-back" class="btn-secondary font-orbitron">BACK</button>
@@ -654,8 +659,12 @@
                 
                 <div class="stats-panel font-inter">
                     <div class="stat-row">
-                        <span>SCORE</span>
+                        <span>DISTANCE SCORE</span>
                         <span id="go-score" class="stat-val font-orbitron">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>COINS COLLECTED</span>
+                        <span id="go-coins" class="stat-val font-orbitron" style="color: #ffd700;">0</span>
                     </div>
                     <div class="stat-row">
                         <span>HIGH SCORE</span>
@@ -685,6 +694,7 @@
             selectedSkin: "duck",
             consecutiveDeaths: 0,
             maxScoreThisSession: 0,
+            totalCoinsCollected: 0,
             
             loadAchievements() {
                 const savedData = localStorage.getItem("duckJoyrideAchievements");
@@ -694,6 +704,7 @@
                     this.consecutiveDeaths = data.consecutiveDeaths || 0;
                     this.maxScoreThisSession = data.maxScoreThisSession || 0;
                     this.selectedSkin = data.selectedSkin || 'duck';
+                    this.totalCoinsCollected = data.totalCoinsCollected || 0;
                 } else {
                     this.saveAchievements();
                 }
@@ -706,7 +717,8 @@
                     achievements: this.achievements,
                     selectedSkin: this.selectedSkin,
                     consecutiveDeaths: this.consecutiveDeaths,
-                    maxScoreThisSession: this.maxScoreThisSession
+                    maxScoreThisSession: this.maxScoreThisSession,
+                    totalCoinsCollected: this.totalCoinsCollected
                 }));
             },
             
@@ -762,7 +774,6 @@
             const ctx = canvas.getContext('2d');
             const r = size / 2;
             
-            // Radial gradient for neon glow
             const grad = ctx.createRadialGradient(r, r, size * 0.05, r, r, r);
             grad.addColorStop(0, '#ffffff');
             grad.addColorStop(0.3, color);
@@ -781,12 +792,9 @@
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
-            
             ctx.clearRect(0, 0, width, height);
             
             const startY = height - 160;
-            
-            // Semi-transparent indigo/purple cityscape silhouette gradient
             const grad = ctx.createLinearGradient(0, startY, 0, height);
             grad.addColorStop(0, 'rgba(24, 18, 56, 0.65)');
             grad.addColorStop(1, 'rgba(10, 7, 24, 0.95)');
@@ -794,19 +802,17 @@
             
             let x = 0;
             while (x < width) {
-                const bWidth = Math.floor(Math.random() * 50) + 40; // 40px - 90px wide
-                const bHeight = Math.floor(Math.random() * 110) + 60; // 60px - 170px tall
+                const bWidth = Math.floor(Math.random() * 50) + 40; 
+                const bHeight = Math.floor(Math.random() * 110) + 60; 
                 const bY = height - bHeight;
                 
                 ctx.fillRect(x, bY, bWidth, bHeight);
                 
-                // Translucent neon cyan building outline
                 ctx.strokeStyle = 'rgba(0, 242, 254, 0.18)';
                 ctx.lineWidth = 1.5;
                 ctx.strokeRect(x, bY, bWidth, bHeight);
                 
-                // Glowing windows
-                ctx.fillStyle = 'rgba(255, 215, 0, 0.35)'; // glowing gold windows
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.35)'; 
                 for (let wy = bY + 12; wy < height - 15; wy += 22) {
                     for (let wx = x + 10; wx < x + bWidth - 10; wx += 16) {
                         if (Math.random() > 0.45) {
@@ -816,7 +822,6 @@
                 }
                 ctx.fillStyle = grad;
                 
-                // Antennas on top of buildings
                 if (Math.random() > 0.7) {
                     ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
                     ctx.beginPath();
@@ -824,15 +829,188 @@
                     ctx.lineTo(x + bWidth / 2, bY - 15);
                     ctx.stroke();
                     
-                    // Blinking red beacons
                     ctx.fillStyle = 'rgba(255, 0, 127, 0.8)';
                     ctx.fillRect(x + bWidth / 2 - 2, bY - 17, 4, 4);
                     ctx.fillStyle = grad;
                 }
                 
-                x += bWidth + 3; // Gap between buildings
+                x += bWidth + 3; 
             }
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        // Procedural Electric Zapper textures
+        function createZapperTexture(scene, key, width, height, vertical = false) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+
+            const r = 8; // electrode node radius
             
+            if (vertical) {
+                const x = width / 2;
+                const y1 = r + 2;
+                const y2 = height - r - 2;
+                
+                // Draw electrodes (metallic nodes)
+                ctx.fillStyle = '#64748b';
+                ctx.beginPath(); ctx.arc(x, y1, r, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x, y2, r, 0, Math.PI * 2); ctx.fill();
+                
+                ctx.fillStyle = '#ffd700'; // gold core
+                ctx.beginPath(); ctx.arc(x, y1, r * 0.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x, y2, r * 0.5, 0, Math.PI * 2); ctx.fill();
+                
+                // Pulsing electric bolt
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#f39c12';
+                ctx.beginPath();
+                ctx.moveTo(x, y1);
+                
+                let currY = y1;
+                while (currY < y2) {
+                    const nextY = Math.min(currY + 12, y2);
+                    const offset = nextY === y2 ? 0 : (Math.random() - 0.5) * 8;
+                    ctx.lineTo(x + offset, nextY);
+                    currY = nextY;
+                }
+                ctx.stroke();
+            } else {
+                const y = height / 2;
+                const x1 = r + 2;
+                const x2 = width - r - 2;
+                
+                // Draw electrodes
+                ctx.fillStyle = '#64748b';
+                ctx.beginPath(); ctx.arc(x1, y, r, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x2, y, r, 0, Math.PI * 2); ctx.fill();
+                
+                ctx.fillStyle = '#ffd700';
+                ctx.beginPath(); ctx.arc(x1, y, r * 0.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(x2, y, r * 0.5, 0, Math.PI * 2); ctx.fill();
+                
+                // Pulsing electric bolt
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#f39c12';
+                ctx.beginPath();
+                ctx.moveTo(x1, y);
+                
+                let currX = x1;
+                while (currX < x2) {
+                    const nextX = Math.min(currX + 12, x2);
+                    const offset = nextX === x2 ? 0 : (Math.random() - 0.5) * 8;
+                    ctx.lineTo(nextX, y + offset);
+                    currX = nextX;
+                }
+                ctx.stroke();
+            }
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        // Procedural Missile texture
+        function createMissileTexture(scene, key, width, height) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+
+            const noseW = width * 0.22;
+            const tailW = width * 0.16;
+            const bodyW = width - noseW - tailW;
+            const centerY = height / 2;
+            const bodyH = height * 0.65;
+
+            // Exhaust fire gradient
+            const grad = ctx.createLinearGradient(0, centerY, tailW, centerY);
+            grad.addColorStop(0, 'rgba(255, 0, 127, 0)');
+            grad.addColorStop(0.5, '#ff5e3a');
+            grad.addColorStop(1, '#ff007f');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(tailW, centerY - bodyH / 3);
+            ctx.lineTo(tailW, centerY + bodyH / 3);
+            ctx.closePath();
+            ctx.fill();
+
+            // Missile body
+            ctx.fillStyle = '#ff0055'; 
+            ctx.fillRect(tailW, centerY - bodyH / 2, bodyW, bodyH);
+
+            // Metal details
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(tailW + bodyW * 0.65, centerY - bodyH / 2, 4, bodyH);
+
+            // Pointy nosecone
+            ctx.fillStyle = '#1e293b'; 
+            ctx.beginPath();
+            ctx.moveTo(tailW + bodyW, centerY - bodyH / 2);
+            ctx.lineTo(width, centerY);
+            ctx.lineTo(tailW + bodyW, centerY + bodyH / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            // Upper & lower fins
+            ctx.fillStyle = '#ff0055';
+            ctx.beginPath();
+            ctx.moveTo(tailW, centerY - bodyH / 2);
+            ctx.lineTo(tailW - 4, centerY - bodyH / 2 - 5);
+            ctx.lineTo(tailW + 6, centerY - bodyH / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(tailW, centerY + bodyH / 2);
+            ctx.lineTo(tailW - 4, centerY + bodyH / 2 + 5);
+            ctx.lineTo(tailW + 6, centerY + bodyH / 2);
+            ctx.closePath();
+            ctx.fill();
+
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        // Procedural Running Ground Scientist texture
+        function createScientistTexture(scene, key, width, height) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, width, height);
+
+            const cx = width / 2;
+
+            // Head
+            ctx.fillStyle = '#fdbcb4';
+            ctx.beginPath();
+            ctx.arc(cx, 6, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Lab coat
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(cx - 3, 10);
+            ctx.lineTo(cx + 3, 10);
+            ctx.lineTo(cx + 5, 20);
+            ctx.lineTo(cx - 5, 20);
+            ctx.closePath();
+            ctx.fill();
+
+            // Running legs
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(cx - 3, 20, 2, 4);
+            ctx.fillRect(cx + 1, 20, 2, 4);
+
+            // Safety glasses
+            ctx.fillStyle = '#00f2fe';
+            ctx.fillRect(cx - 2, 4, 4, 2);
+
             scene.textures.addCanvas(key, canvas);
         }
 
@@ -842,7 +1020,6 @@
             constructor() { super('PreloaderScene'); }
 
             preload() {
-                // Background Gradients created via Canvas textures
                 const canvas = document.createElement('canvas');
                 canvas.width = this.game.config.width;
                 canvas.height = this.game.config.height;
@@ -854,14 +1031,19 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 this.textures.addCanvas('bg_gradient', canvas);
 
-                // Create procedural glowing particle textures
-                createNeonParticleTexture(this, 'trail_particle', 16, '#00f2fe'); // Cyan bubble
-                createNeonParticleTexture(this, 'coin_particle', 16, '#ffd700'); // Gold spark
-                createNeonParticleTexture(this, 'shield_particle', 20, '#00f2fe'); // Cyan shield spark
-                createNeonParticleTexture(this, 'obstacle_particle', 20, '#ff007f'); // Neon pink explosion spark
+                // Create procedural visual textures
+                createNeonParticleTexture(this, 'trail_particle', 16, '#00f2fe'); 
+                createNeonParticleTexture(this, 'coin_particle', 16, '#ffd700'); 
+                createNeonParticleTexture(this, 'shield_particle', 20, '#00f2fe'); 
+                createNeonParticleTexture(this, 'obstacle_particle', 20, '#ff007f'); 
 
-                // Create Parallax Cityscape midground silhouette (720px wide for tiling)
                 createParallaxMidgroundTexture(this, 'midground_city', 720, this.game.config.height);
+                
+                // Procedural zapper + missile + scientist shapes
+                createZapperTexture(this, 'zapper_horizontal', 110, 22, false);
+                createZapperTexture(this, 'zapper_vertical', 22, 110, true);
+                createMissileTexture(this, 'missile', 48, 20);
+                createScientistTexture(this, 'scientist_run', 16, 24);
 
                 // Background scroll textures
                 this.load.image('bg_day_1', 'https://i.imgur.com/Ydj1Ahf.png');
@@ -869,7 +1051,7 @@
                 this.load.image('bg_night', 'https://i.imgur.com/x7Hufmr.png');
                 this.load.image('bg_day_2', 'https://i.imgur.com/BVZCQ0e.png');
 
-                // Character Skins - local & remote
+                // Character Skins
                 this.load.image('duck', 'Assets4game2/duck-removebg-preview.png');
                 this.load.image('golden_duck', 'Assets4game2/golden_duck-removebg-preview.png');
                 this.load.image('cyber_duck', 'Assets4game2/cyber_duck__2_-removebg-preview.png');
@@ -890,7 +1072,7 @@
                 this.load.image('decent_duck_9', 'https://i.imgur.com/aMIzw1g.png');
                 this.load.image('decent_duck_10', 'https://i.imgur.com/L5IXyoy.png');
 
-                // Items & Obstacles - Assets4game2
+                // Items & Obstacles
                 this.load.image('balloon', 'Assets4game2/balloon-removebg-preview.png');
                 this.load.image('speed_boost', 'Assets4game2/boost-removebg-preview.png');
                 this.load.image('shield', 'Assets4game2/shield-removebg-preview.png');
@@ -920,14 +1102,14 @@
             create() {
                 const { width, height } = this.game.config;
 
-                // LAYER 0: Far Background Sky (tileSprite)
+                // LAYER 0: Far Sky
                 this.backgrounds = ['bg_day_1', 'bg_sunset', 'bg_night', 'bg_day_2'];
                 this.darkBackgrounds = ['bg_sunset', 'bg_night'];
                 this.currentBackgroundIndex = 0;
                 this.backgroundCycleTimer = 0;
                 this.background = this.add.tileSprite(0, 0, width, height, this.backgrounds[0]).setOrigin(0, 0).setDepth(0);
 
-                // LAYER 1: Parallax Midground Cityscape (tileSprite)
+                // LAYER 1: Parallax Midground
                 this.midground = this.add.tileSprite(0, 0, width, height, 'midground_city').setOrigin(0, 0).setDepth(1);
 
                 const sf = scaleFactor(this);
@@ -939,10 +1121,10 @@
                 this.player.setGravityY(0);
                 this.isPlaying = false;
                 
-                // LAYER 15: Shield Graphics Overlay
+                // LAYER 15: Shield graphics overlay
                 this.shieldGraphics = this.add.graphics().setDepth(15);
 
-                // Initialize Physics Groups (depth 10)
+                // Initialize Physics Groups
                 this.peas = this.physics.add.group(); 
                 this.coins = this.physics.add.group(); 
                 this.stars = this.physics.add.group(); 
@@ -953,6 +1135,12 @@
                 this.shields = this.physics.add.group(); 
                 this.peaPods = this.physics.add.group(); 
                 this.magnets = this.physics.add.group();
+
+                // Jetpack Joyride structured obstacle groups
+                this.zappersHorizontal = this.physics.add.group();
+                this.zappersVertical = this.physics.add.group();
+                this.missiles = this.physics.add.group();
+                this.scientists = this.physics.add.group();
 
                 // Input handling
                 this.cursors = this.input.keyboard.createCursorKeys();
@@ -979,13 +1167,19 @@
                 this.peaMultiplierTimer = 0; 
                 this.magnetActive = false; 
                 this.magnetTimer = 0;
+                
+                this.coinsCollectedThisRun = 0;
 
                 // Timers
                 this.obstacleSpawnTimer = 0;
                 this.peaSpawnTimer = 0;
                 this.starSpawnTimer = 0;
                 this.powerUpSpawnTimer = 0;
-                this.coinSpawnTimer = 0;
+                
+                // Structured spawner timers
+                this.coinFormationSpawnTimer = 0;
+                this.missileSpawnTimer = 0;
+                this.scientistSpawnTimer = 0;
 
                 // LAYER 5: Jetpack Bubble Trail Emitter
                 this.trailParticles = this.add.particles('trail_particle').setDepth(5);
@@ -996,7 +1190,7 @@
                     scale: { start: 0.9, end: 0.1 },
                     alpha: { start: 0.7, end: 0 },
                     lifespan: 500,
-                    frequency: -1, // Emitted manually during flight
+                    frequency: -1, 
                     gravityY: 60,
                     blendMode: 'ADD'
                 });
@@ -1009,7 +1203,10 @@
                 this.physics.add.overlap(this.player, this.shields, this.collectShield, null, this); 
                 this.physics.add.overlap(this.player, this.peaPods, this.collectPeaPod, null, this); 
                 this.physics.add.overlap(this.player, this.magnets, this.collectMagnet, null, this); 
+                
+                // Hazards overlaps
                 this.physics.add.overlap(this.player, [this.rocks, this.birds, this.balloons], this.hitObstacle, null, this);
+                this.physics.add.overlap(this.player, [this.zappersHorizontal, this.zappersVertical, this.missiles], this.hitObstacle, null, this);
             }
 
             updatePlayerSkin() {
@@ -1043,18 +1240,26 @@
                 this.peaMultiplierTimer = 0;
                 this.magnetActive = false;
                 this.magnetTimer = 0;
+                this.coinsCollectedThisRun = 0;
 
                 // Timers reset
                 this.obstacleSpawnTimer = 0;
                 this.peaSpawnTimer = 0;
                 this.starSpawnTimer = 0;
                 this.powerUpSpawnTimer = 0;
-                this.coinSpawnTimer = 0;
+                
+                this.coinFormationSpawnTimer = 0;
+                this.missileSpawnTimer = 0;
+                this.scientistSpawnTimer = 0;
 
                 // Destroy active objects
                 this.rocks.clear(true, true);
                 this.birds.clear(true, true);
                 this.balloons.clear(true, true);
+                this.zappersHorizontal.clear(true, true);
+                this.zappersVertical.clear(true, true);
+                this.missiles.clear(true, true);
+                this.scientists.clear(true, true);
                 this.peas.clear(true, true);
                 this.coins.clear(true, true);
                 this.stars.clear(true, true);
@@ -1063,17 +1268,20 @@
                 this.peaPods.clear(true, true);
                 this.magnets.clear(true, true);
 
-                // Setup player
+                // Snappy Jetpack Physics (set constraints on arcade body)
                 this.player.setPosition(80, 320);
                 this.player.body.setVelocity(0, 0);
-                this.player.setGravityY(800);
+                this.player.body.setAccelerationY(0);
+                this.player.setGravityY(950); // High gravity feel
+                this.player.body.setMaxVelocity(300, 420); // Clamp maximum rise and fall speeds
+                
                 this.updatePlayerSkin();
                 
                 this.isPlaying = true;
                 updateHUD(this);
             }
 
-            // Burst particle helper (instantiates dynamic visual explosions on canvas)
+            // Burst particle explosion helper
             triggerExplosion(x, y, particleKey, count = 10) {
                 const manager = this.add.particles(particleKey).setDepth(12);
                 const emitter = manager.createEmitter({
@@ -1086,22 +1294,54 @@
                 });
                 emitter.explode(count, x, y);
                 
-                // Cleanup particle manager
                 this.time.delayedCall(600, () => {
                     manager.destroy();
                 });
+            }
+
+            // Spawns coins in structured shapes (lines, waves, grids)
+            spawnCoinFormation(type) {
+                const { width, height } = this.game.config;
+                const sf = scaleFactor(this);
+                const startX = width + 60;
+                const startY = Phaser.Math.Between(110, 470);
+
+                if (type === 'line') {
+                    // Straight horizontal line (5 coins)
+                    for (let i = 0; i < 5; i++) {
+                        const c = this.coins.create(startX + i * 35, startY, 'coin');
+                        c.setScale(0.3 * sf).setDepth(10);
+                        if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8);
+                    }
+                } else if (type === 'wave') {
+                    // Wave pattern (6 coins)
+                    for (let i = 0; i < 6; i++) {
+                        const c = this.coins.create(startX + i * 35, startY + Math.sin(i * 0.8) * 45, 'coin');
+                        c.setScale(0.3 * sf).setDepth(10);
+                        if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8);
+                    }
+                } else if (type === 'grid') {
+                    // 3x3 grid block (9 coins)
+                    for (let row = 0; row < 3; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            const c = this.coins.create(startX + col * 35, startY + row * 35, 'coin');
+                            c.setScale(0.3 * sf).setDepth(10);
+                            if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8);
+                        }
+                    }
+                }
             }
 
             update(time, delta) {
                 const deltaSeconds = delta / 1000;
 
                 if (!this.isPlaying) {
-                    // Slow idle parallax scroll for menu background
                     this.background.tilePositionX += Global.baseScrollSpeed * deltaSeconds * 0.1;
                     this.midground.tilePositionX += Global.baseScrollSpeed * deltaSeconds * 0.3;
                     
                     this.player.y = 320 + Math.sin(time / 250) * 12;
                     this.player.body.setVelocity(0, 0);
+                    this.player.body.setAccelerationY(0);
                     
                     this.shieldGraphics.clear();
                     this.jetpackEmitter.stop();
@@ -1121,10 +1361,10 @@
                 }
 
                 // 3-Tier Parallax Scrolling
-                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.15; // Sky (15%)
-                this.midground.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.45;  // City (45%)
+                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.15; 
+                this.midground.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.45;  
 
-                // Background sky index cycle
+                // Background sky cycle
                 this.backgroundCycleTimer += deltaSeconds;
                 if (this.backgroundCycleTimer >= 60) {
                     this.backgroundCycleTimer = 0;
@@ -1132,13 +1372,18 @@
                     this.background.setTexture(this.backgrounds[this.currentBackgroundIndex]);
                 }
 
-                // Player flap controller
+                // Snappy Jetpack forces (acceleration-based vertical flight)
                 const isFlapping = this.isTouching || this.cursors.space.isDown;
-                this.player.body.setVelocityY(isFlapping ? -320 : this.player.body.velocity.y);
-
-                // Emit jetpack bubble trail when flying
-                if (isFlapping && this.player.body.velocity.y < 0) {
-                    this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
+                if (isFlapping) {
+                    this.player.body.setAccelerationY(-1950); // snap upward thrust
+                    
+                    // Emit flight bubble particles
+                    if (this.player.body.velocity.y < 0) {
+                        this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
+                    }
+                } else {
+                    this.player.body.setAccelerationY(0); // fall via gravity
+                    this.jetpackEmitter.stop();
                 }
 
                 // Update Power-ups
@@ -1146,9 +1391,9 @@
 
                 // Move and spawn objects
                 this.updateObjects(deltaSeconds);
-                this.spawnObjects(deltaSeconds, clampedScale);
+                this.spawnObjects(deltaSeconds, clampedScale, time);
 
-                // Draw pulsing cyan shield
+                // Draw pulsing shield
                 this.drawShieldEffect(time);
 
                 // HUD Sync
@@ -1161,11 +1406,9 @@
                     const pulse = 0.6 + Math.sin(time / 120) * 0.2;
                     const radius = Math.max(this.player.displayHeight, this.player.displayWidth) * 0.68;
                     
-                    // Draw outer cyan glow
                     this.shieldGraphics.lineStyle(4, 0x00f2fe, 0.4 * pulse);
                     this.shieldGraphics.strokeCircle(this.player.x, this.player.y, radius + 4);
                     
-                    // Draw inner white shield line
                     this.shieldGraphics.lineStyle(2, 0xffffff, 0.8 * pulse);
                     this.shieldGraphics.strokeCircle(this.player.x, this.player.y, radius);
                 }
@@ -1208,7 +1451,7 @@
 
             updateObjects(deltaSeconds) {
                 const moveObj = (obj) => {
-                    obj.x -= Global.currentScrollSpeed * deltaSeconds; // Move at full speed (100%)
+                    obj.x -= Global.currentScrollSpeed * deltaSeconds; 
                     if (obj.x < -60) obj.destroy();
                 };
                 
@@ -1222,20 +1465,48 @@
                 this.shields.getChildren().forEach(moveObj);
                 this.peaPods.getChildren().forEach(moveObj);
                 this.magnets.getChildren().forEach(moveObj);
+                
+                // Hazads updates
+                this.zappersHorizontal.getChildren().forEach(moveObj);
+                this.zappersVertical.getChildren().forEach(moveObj);
+                
+                // Missiles run on custom velocity, clean up offscreen
+                this.missiles.getChildren().forEach(m => {
+                    if (m.x < -60) m.destroy();
+                });
+
+                // Scientists walking cleanup + run animation wiggle
+                this.scientists.getChildren().forEach(s => {
+                    if (s.x < -30) {
+                        s.destroy();
+                    } else {
+                        // Wiggle angle to simulate running silhouette
+                        s.angle = Math.sin(this.time.now / 45) * 12;
+                    }
+                });
             }
 
-            spawnObjects(deltaSeconds, speedMultiplier) {
+            spawnObjects(deltaSeconds, speedMultiplier, time) {
                 const { width, height } = this.game.config;
                 const sf = scaleFactor(this);
 
+                // Spawn structured Coin Formations (Waves / Blocks / Rows)
+                this.coinFormationSpawnTimer += deltaSeconds;
+                if (this.coinFormationSpawnTimer >= 8.5) {
+                    const formations = ['line', 'wave', 'grid'];
+                    const type = Phaser.Math.RND.pick(formations);
+                    this.spawnCoinFormation(type);
+                    this.coinFormationSpawnTimer = 0;
+                }
+
                 // Spawn Peas
                 this.peaSpawnTimer += deltaSeconds;
-                if (this.peaSpawnTimer >= 1.6) {
+                if (this.peaSpawnTimer >= 1.8) {
                     const count = Phaser.Math.Between(2, 4);
                     const y = Phaser.Math.Between(45, 595);
                     for (let i = 0; i < count; i++) {
                         const p = this.peas.create(width + 50 + i * 40, y, 'pea');
-                        p.setScale(0.3 * sf);
+                        p.setScale(0.3 * sf).setDepth(10);
                         if (p.body) p.body.setSize(p.width * 0.8, p.height * 0.8);
                     }
                     this.peaSpawnTimer = 0;
@@ -1246,36 +1517,101 @@
                     this.starSpawnTimer += deltaSeconds;
                     if (this.starSpawnTimer >= 8) {
                         const s = this.stars.create(width + 50, Phaser.Math.Between(45, 595), 'star');
-                        s.setScale(0.35 * sf);
+                        s.setScale(0.35 * sf).setDepth(10);
                         if (s.body) s.body.setSize(s.width * 0.8, s.height * 0.8);
                         this.starSpawnTimer = 0;
                     }
                 }
 
-                // Spawn Obstacles (spawn interval scales dynamically with speed multiplier)
+                // Spawn ambient background scientists running at bottom
+                this.scientistSpawnTimer += deltaSeconds;
+                if (this.scientistSpawnTimer >= Phaser.Math.Between(3, 6)) {
+                    const s = this.scientists.create(width + 20, height - 22, 'scientist_run');
+                    s.setScale(sf * 0.8).setDepth(2);
+                    s.body.setGravityY(0);
+                    // scientist runs faster than floor scroll
+                    s.body.setVelocityX(-Global.currentScrollSpeed - Phaser.Math.Between(30, 70));
+                    this.scientistSpawnTimer = 0;
+                }
+
+                // Spawn warned incoming Missiles
+                this.missileSpawnTimer += deltaSeconds;
+                if (this.missileSpawnTimer >= 17) {
+                    const targetY = Phaser.Math.Between(80, 560);
+                    
+                    // Create red flashing warning box at right border
+                    const warningText = this.add.text(width - 25, targetY, '!', {
+                        fontFamily: 'Orbitron',
+                        fontSize: '32px',
+                        color: '#ff0055',
+                        fontStyle: 'bold'
+                    }).setOrigin(0.5).setDepth(20);
+
+                    // Flash tween warning
+                    this.tweens.add({
+                        targets: warningText,
+                        alpha: 0.1,
+                        duration: 150,
+                        yoyo: true,
+                        repeat: 5,
+                        onComplete: () => {
+                            warningText.destroy();
+                            
+                            // Only spawn if player hasn't died in 1.5s
+                            if (this.isPlaying && !this.gameOverState) {
+                                const missile = this.missiles.create(width + 50, targetY, 'missile');
+                                missile.setScale(sf).setDepth(10);
+                                if (missile.body) {
+                                    missile.body.setGravityY(0);
+                                    missile.body.setSize(missile.width * 0.8, missile.height * 0.7);
+                                    missile.body.setVelocityX(-650 * sf); // Hyper-velocity missile
+                                }
+                                this.cameras.main.shake(120, 0.005);
+                            }
+                        }
+                    });
+                    
+                    this.missileSpawnTimer = 0;
+                }
+
+                // Spawn obstacles (Rocks, Birds, Balloons, Zappers)
                 this.obstacleSpawnTimer += deltaSeconds;
                 const baseInterval = Math.max(0.5, 2.0 - (this.level * 0.1));
                 const scaledInterval = Math.max(0.4, baseInterval / speedMultiplier);
                 
                 if (this.obstacleSpawnTimer >= scaledInterval) {
-                    const obstacleType = Phaser.Math.RND.pick(['rock', 'bird', 'balloon']);
-                    const obstacle = this.physics.add.sprite(width + 50, Phaser.Math.Between(45, 595), obstacleType);
-                    obstacle.setScale(0.3 * sf);
-                    if (obstacle.body) obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8);
+                    const obstacleType = Phaser.Math.RND.pick(['rock', 'bird', 'balloon', 'zapper_h', 'zapper_v']);
+                    const y = Phaser.Math.Between(100, 540);
+                    
+                    let obstacle;
+                    if (obstacleType === 'rock') {
+                        obstacle = this.rocks.create(width + 50, y, 'rock');
+                    } else if (obstacleType === 'bird') {
+                        obstacle = this.birds.create(width + 50, y, 'bird');
+                    } else if (obstacleType === 'balloon') {
+                        obstacle = this.balloons.create(width + 50, y, 'balloon');
+                    } else if (obstacleType === 'zapper_h') {
+                        obstacle = this.zappersHorizontal.create(width + 80, y, 'zapper_horizontal');
+                    } else if (obstacleType === 'zapper_v') {
+                        obstacle = this.zappersVertical.create(width + 80, y, 'zapper_vertical');
+                    }
 
-                    if (obstacleType === 'rock') this.rocks.add(obstacle);
-                    if (obstacleType === 'bird') this.birds.add(obstacle);
-                    if (obstacleType === 'balloon') this.balloons.add(obstacle);
-
+                    if (obstacle) {
+                        obstacle.setScale(0.32 * sf).setDepth(10);
+                        if (obstacle.body) {
+                            obstacle.body.setGravityY(0);
+                            obstacle.body.setSize(obstacle.width * 0.8, obstacle.height * 0.8);
+                        }
+                    }
                     this.obstacleSpawnTimer = 0;
                 }
 
-                // Spawn Power-ups (one spawn every 24s)
+                // Spawn Power-ups
                 this.powerUpSpawnTimer += deltaSeconds;
-                if (this.powerUpSpawnTimer >= 24) {
+                if (this.powerUpSpawnTimer >= 26) {
                     const powerUps = ['speed_boost', 'shield', 'pea_pod', 'magnet'];
                     const chosen = Phaser.Math.RND.pick(powerUps);
-                    const y = Phaser.Math.Between(45, 595);
+                    const y = Phaser.Math.Between(100, 540);
                     let powerUp;
 
                     if (chosen === 'speed_boost') powerUp = this.speedBoosts.create(width + 50, y, 'speed_boost');
@@ -1284,19 +1620,13 @@
                     if (chosen === 'magnet') powerUp = this.magnets.create(width + 50, y, 'magnet');
 
                     if (powerUp) {
-                        powerUp.setScale(0.32 * sf);
-                        if (powerUp.body) powerUp.body.setSize(powerUp.width * 0.8, powerUp.height * 0.8);
+                        powerUp.setScale(0.32 * sf).setDepth(10);
+                        if (powerUp.body) {
+                            powerUp.body.setGravityY(0);
+                            powerUp.body.setSize(powerUp.width * 0.8, powerUp.height * 0.8);
+                        }
                     }
                     this.powerUpSpawnTimer = 0;
-                }
-
-                // Spawn Coins
-                this.coinSpawnTimer += deltaSeconds;
-                if (this.coinSpawnTimer >= 15) {
-                    const c = this.coins.create(width + 50, Phaser.Math.Between(45, 595), 'coin');
-                    c.setScale(0.3 * sf);
-                    if (c.body) c.body.setSize(c.width * 0.8, c.height * 0.8);
-                    this.coinSpawnTimer = 0;
                 }
             }
 
@@ -1327,9 +1657,7 @@
                 
                 this.score += bonus;
                 
-                // Pea burst explosion particles
                 this.triggerExplosion(pea.x, pea.y, 'trail_particle', 5);
-                
                 this.checkLevelUp();
                 pea.destroy();
             }
@@ -1343,7 +1671,11 @@
                 
                 this.score += bonus;
                 
-                // Coin gold explosion particles + subtle camera shake
+                // Track coin stats
+                this.coinsCollectedThisRun++;
+                Achievements.totalCoinsCollected++;
+                Achievements.saveAchievements();
+
                 this.triggerExplosion(coin.x, coin.y, 'coin_particle', 12);
                 this.cameras.main.shake(100, 0.005);
                 
@@ -1360,7 +1692,6 @@
                 
                 this.score += bonus;
                 
-                // Gold star explosion particles + subtle camera shake
                 this.triggerExplosion(star.x, star.y, 'coin_particle', 15);
                 this.cameras.main.shake(120, 0.007);
                 
@@ -1374,7 +1705,6 @@
                 this.speedBoostTimer = 10;
                 this.isInvincible = true;
                 
-                // Particle explosion and camera shake
                 this.triggerExplosion(sb.x, sb.y, 'coin_particle', 18);
                 this.cameras.main.shake(150, 0.008);
                 
@@ -1385,7 +1715,6 @@
                 if (this.gameOverState) return;
                 this.hasShield = true;
                 
-                // Particle explosion and camera shake
                 this.triggerExplosion(s.x, s.y, 'shield_particle', 18);
                 this.cameras.main.shake(150, 0.008);
                 
@@ -1397,7 +1726,6 @@
                 this.peaMultiplierActive = true;
                 this.peaMultiplierTimer = 30;
                 
-                // Particle explosion and camera shake
                 this.triggerExplosion(pp.x, pp.y, 'trail_particle', 18);
                 this.cameras.main.shake(150, 0.008);
                 
@@ -1409,7 +1737,6 @@
                 this.magnetActive = true;
                 this.magnetTimer = 30;
                 
-                // Particle explosion and camera shake
                 this.triggerExplosion(m.x, m.y, 'trail_particle', 18);
                 this.cameras.main.shake(150, 0.008);
                 
@@ -1426,7 +1753,6 @@
                 } else if (this.hasShield) {
                     this.hasShield = false;
                     
-                    // Shield breaks - major cyan explosion particles + medium camera shake
                     this.triggerExplosion(o.x, o.y, 'shield_particle', 22);
                     this.cameras.main.shake(200, 0.012);
                     
@@ -1436,13 +1762,13 @@
                     this.gameOverState = true;
                     this.isPlaying = false;
                     this.player.body.setVelocity(0, 0);
+                    this.player.body.setAccelerationY(0);
                     this.player.setGravityY(0);
                     this.shieldGraphics.clear();
                     this.jetpackEmitter.stop();
 
                     const finalScore = Math.floor(this.score);
                     
-                    // Crash explosion particles + major camera shake
                     this.triggerExplosion(this.player.x, this.player.y, 'obstacle_particle', 30);
                     this.cameras.main.shake(300, 0.020);
 
@@ -1461,7 +1787,7 @@
                         Achievements.consecutiveDeaths = 0;
                     }
 
-                    window.showGameOver(finalScore);
+                    window.showGameOver(finalScore, this.coinsCollectedThisRun);
                 }
 
                 this.comboCount = 0;
@@ -1492,6 +1818,7 @@
 
         function updateHUD(scene) {
             document.getElementById('hud-score').innerText = `SCORE: ${Math.floor(scene.score)}`;
+            document.getElementById('hud-coins').innerText = `COINS: ${scene.coinsCollectedThisRun}`;
             document.getElementById('hud-level').innerText = `Level ${scene.level}`;
             
             const comboEl = document.getElementById('hud-combo');
@@ -1502,7 +1829,7 @@
                 comboEl.classList.add('hidden');
             }
 
-            // Power-up timers display
+            // Power-up timers
             const boostEl = document.getElementById('powerup-boost');
             if (scene.speedBoostActive) {
                 document.getElementById('boost-timer').innerText = `${Math.ceil(scene.speedBoostTimer)}s`;
@@ -1574,7 +1901,7 @@
                 const isSelected = Achievements.selectedSkin === skin.name;
 
                 if (!isUnlocked && achievement?.hidden) {
-                    return; // Skip hidden locked skins
+                    return; 
                 }
 
                 const card = document.createElement('div');
@@ -1609,9 +1936,10 @@
             populateSkinsGrid('og');
         };
 
-        window.showGameOver = function(score) {
+        window.showGameOver = function(score, coins) {
             refreshHighScores();
             document.getElementById('go-score').innerText = score;
+            document.getElementById('go-coins').innerText = coins;
             screens.hud.classList.add('hidden');
             showScreen('gameOver');
         };
@@ -1711,14 +2039,11 @@
             
             container.appendChild(img);
             
-            // Force browser reflow to register the initial styles before transitioning
             img.offsetHeight;
             
-            // Trigger transition: float up by 40px, scale up slightly, fade out
             img.style.transform = 'translateY(-45px) scale(1.15)';
             img.style.opacity = '0';
             
-            // Completely remove the element from the DOM after 0.8s
             setTimeout(() => {
                 img.remove();
             }, 800);
