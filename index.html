@@ -1681,6 +1681,12 @@
 
         // --- CLICK BURST MECHANIC ---
         document.getElementById('game-container').addEventListener('pointerdown', (e) => {
+            // ONLY spawn the logo burst if NOT actively playing the game
+            const gameScene = game && game.scene && game.scene.keys && game.scene.keys.GameScene;
+            if (gameScene && gameScene.isPlaying) {
+                return; // Suppress during active gameplay to avoid distraction
+            }
+
             const container = document.getElementById('game-container');
             const rect = container.getBoundingClientRect();
             
