@@ -38,18 +38,48 @@
             color: var(--color-text-primary);
         }
 
+        /* Pulsing neon border cabinet animation */
+        @keyframes borderGlowPulse {
+            0% {
+                box-shadow: 0 0 20px rgba(0, 242, 254, 0.2), 
+                            0 0 40px rgba(255, 0, 127, 0.1),
+                            inset 0 0 12px rgba(0, 242, 254, 0.15);
+                border-color: rgba(0, 242, 254, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 242, 254, 0.4), 
+                            0 0 60px rgba(255, 0, 127, 0.25),
+                            inset 0 0 20px rgba(0, 242, 254, 0.25);
+                border-color: rgba(0, 242, 254, 0.6);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(0, 242, 254, 0.2), 
+                            0 0 40px rgba(255, 0, 127, 0.1),
+                            inset 0 0 12px rgba(0, 242, 254, 0.15);
+                border-color: rgba(0, 242, 254, 0.3);
+            }
+        }
+
+        /* Responsive scaling aspect-ratio wrapper */
         #game-container {
             position: relative;
-            width: 360px;
-            height: 640px;
-            max-width: 100vw;
-            max-height: 100vh;
-            aspect-ratio: 9/16;
+            box-sizing: border-box;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 254, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.05);
             background: var(--color-bg);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            animation: borderGlowPulse 4s infinite ease-in-out;
+            
+            /* Responsive sizing based on viewport aspect-ratio */
+            width: min(360px, 94vw);
+            height: calc(min(360px, 94vw) * 16 / 9);
+        }
+
+        @media (min-aspect-ratio: 9/16) {
+            #game-container {
+                height: min(640px, 94vh);
+                width: calc(min(640px, 94vh) * 9 / 16);
+            }
         }
 
         canvas {
@@ -66,7 +96,7 @@
             width: 100%;
             height: 100%;
             z-index: 10;
-            pointer-events: none; /* Let clicks pass through when screens are hidden */
+            pointer-events: none;
         }
 
         /* Base Screen style */
@@ -82,18 +112,19 @@
             justify-content: space-around;
             padding: 30px 20px;
             box-sizing: border-box;
-            background: rgba(7, 7, 20, 0.82);
+            background: rgba(7, 7, 20, 0.84);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            pointer-events: auto; /* Intercept clicks on active screens */
-            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: auto;
+            transition: opacity 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             opacity: 1;
+            transform: scale(1);
         }
 
         .ui-screen.hidden {
             opacity: 0;
             pointer-events: none;
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
         /* Font helper classes */
@@ -141,7 +172,7 @@
         }
 
         .screen-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
             margin: 0;
@@ -163,9 +194,10 @@
             border-radius: 16px;
             padding: 12px 30px;
             backdrop-filter: blur(4px);
+            transition: all 0.3s ease;
         }
         .high-score-container span:first-child {
-            font-size: 10px;
+            font-size: 9px;
             color: var(--color-text-secondary);
             letter-spacing: 2px;
         }
@@ -228,7 +260,7 @@
             font-weight: 700;
             padding: 14px 20px;
             border-radius: 12px;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             text-transform: uppercase;
         }
 
@@ -239,9 +271,9 @@
             box-shadow: 0 0 15px var(--color-primary-glow);
         }
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 25px var(--color-primary-glow);
-            filter: brightness(1.1);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 25px var(--color-primary-glow), 0 0 10px var(--color-primary);
+            filter: brightness(1.15);
         }
         .btn-primary:active {
             transform: translateY(1px);
@@ -253,9 +285,10 @@
             border: 1px solid var(--glass-border);
         }
         .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+            transform: translateY(-2px);
         }
         .btn-secondary:active {
             transform: translateY(1px);
@@ -309,6 +342,7 @@
             color: var(--color-text-secondary);
             font-size: 11px;
             font-weight: 700;
+            transition: all 0.3s ease;
         }
         .tab-btn.active {
             background: rgba(255, 255, 255, 0.08);
@@ -358,7 +392,7 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            transition: all 0.2s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             position: relative;
             cursor: pointer;
             box-sizing: border-box;
@@ -366,6 +400,7 @@
         .skin-card:hover {
             background: rgba(255, 255, 255, 0.06);
             border-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
         }
         .skin-card.selected {
             border-color: var(--color-primary);
@@ -375,6 +410,9 @@
         .skin-card.locked {
             opacity: 0.4;
             cursor: not-allowed;
+        }
+        .skin-card.locked:hover {
+            transform: none;
         }
 
         .skin-preview {
@@ -443,7 +481,7 @@
         #hud-score {
             font-size: 18px;
             color: #fff;
-            text-shadow: 0 0 8px rgba(255,255,255,0.4);
+            text-shadow: 0 0 8px var(--color-primary-glow), 0 0 15px var(--color-primary-glow);
         }
         #hud-level {
             color: var(--color-text-secondary);
@@ -477,11 +515,18 @@
             gap: 6px;
         }
 
+        /* Pulse animation for active badges */
+        @keyframes badgePulse {
+            0% { opacity: 0.85; }
+            50% { opacity: 1; filter: brightness(1.2); }
+            100% { opacity: 0.85; }
+        }
+
         .powerup-badge {
             display: flex;
             align-items: center;
             gap: 6px;
-            background: rgba(7, 7, 20, 0.7);
+            background: rgba(7, 7, 20, 0.75);
             border: 1px solid rgba(255, 255, 255, 0.1);
             padding: 4px 8px;
             border-radius: 8px;
@@ -493,6 +538,7 @@
             min-width: 90px;
             justify-content: space-between;
             box-sizing: border-box;
+            animation: badgePulse 1.5s infinite ease-in-out;
         }
 
         #powerup-boost { border-color: var(--color-gold); box-shadow: 0 0 5px rgba(255, 215, 0, 0.2); }
@@ -563,7 +609,7 @@
                 
                 <div class="screen-content font-inter">
                     <p><span class="highlight">TAP SCREEN</span> or <span class="highlight">PRESS SPACEBAR</span> to fly upwards.</p>
-                    <p>Release finger/key to descend.</p>
+                    <p>Release to descend.</p>
                     <p>Avoid <span class="warning">ROCKS</span>, <span class="warning">BIRDS</span>, and <span class="warning">BALLOONS</span>.</p>
                     <p>Collect <span class="highlight">PEAS</span>, <span class="highlight">COINS</span>, and <span class="highlight">STARS</span>.</p>
                     <p>Grab power-ups for Speed Boost, Magnet, Shield, and Multipliers.</p>
@@ -707,6 +753,89 @@
             return Math.min(scene.game.config.width / 360, scene.game.config.height / 640);
         }
 
+        // --- PROCEDURAL GENERATORS (Canvas Textures) ---
+
+        function createNeonParticleTexture(scene, key, size, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            const r = size / 2;
+            
+            // Radial gradient for neon glow
+            const grad = ctx.createRadialGradient(r, r, size * 0.05, r, r, r);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.3, color);
+            grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(r, r, r, 0, Math.PI * 2);
+            ctx.fill();
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
+        function createParallaxMidgroundTexture(scene, key, width, height) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const startY = height - 160;
+            
+            // Semi-transparent indigo/purple cityscape silhouette gradient
+            const grad = ctx.createLinearGradient(0, startY, 0, height);
+            grad.addColorStop(0, 'rgba(24, 18, 56, 0.65)');
+            grad.addColorStop(1, 'rgba(10, 7, 24, 0.95)');
+            ctx.fillStyle = grad;
+            
+            let x = 0;
+            while (x < width) {
+                const bWidth = Math.floor(Math.random() * 50) + 40; // 40px - 90px wide
+                const bHeight = Math.floor(Math.random() * 110) + 60; // 60px - 170px tall
+                const bY = height - bHeight;
+                
+                ctx.fillRect(x, bY, bWidth, bHeight);
+                
+                // Translucent neon cyan building outline
+                ctx.strokeStyle = 'rgba(0, 242, 254, 0.18)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(x, bY, bWidth, bHeight);
+                
+                // Glowing windows
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.35)'; // glowing gold windows
+                for (let wy = bY + 12; wy < height - 15; wy += 22) {
+                    for (let wx = x + 10; wx < x + bWidth - 10; wx += 16) {
+                        if (Math.random() > 0.45) {
+                            ctx.fillRect(wx, wy, 4, 5);
+                        }
+                    }
+                }
+                ctx.fillStyle = grad;
+                
+                // Antennas on top of buildings
+                if (Math.random() > 0.7) {
+                    ctx.strokeStyle = 'rgba(0, 242, 254, 0.4)';
+                    ctx.beginPath();
+                    ctx.moveTo(x + bWidth / 2, bY);
+                    ctx.lineTo(x + bWidth / 2, bY - 15);
+                    ctx.stroke();
+                    
+                    // Blinking red beacons
+                    ctx.fillStyle = 'rgba(255, 0, 127, 0.8)';
+                    ctx.fillRect(x + bWidth / 2 - 2, bY - 17, 4, 4);
+                    ctx.fillStyle = grad;
+                }
+                
+                x += bWidth + 3; // Gap between buildings
+            }
+            
+            scene.textures.addCanvas(key, canvas);
+        }
+
         // --- PHASER SCENES ---
 
         class PreloaderScene extends Phaser.Scene {
@@ -725,13 +854,22 @@
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 this.textures.addCanvas('bg_gradient', canvas);
 
+                // Create procedural glowing particle textures
+                createNeonParticleTexture(this, 'trail_particle', 16, '#00f2fe'); // Cyan bubble
+                createNeonParticleTexture(this, 'coin_particle', 16, '#ffd700'); // Gold spark
+                createNeonParticleTexture(this, 'shield_particle', 20, '#00f2fe'); // Cyan shield spark
+                createNeonParticleTexture(this, 'obstacle_particle', 20, '#ff007f'); // Neon pink explosion spark
+
+                // Create Parallax Cityscape midground silhouette (720px wide for tiling)
+                createParallaxMidgroundTexture(this, 'midground_city', 720, this.game.config.height);
+
                 // Background scroll textures
                 this.load.image('bg_day_1', 'https://i.imgur.com/Ydj1Ahf.png');
                 this.load.image('bg_sunset', 'https://i.imgur.com/AccxT6z.png');
                 this.load.image('bg_night', 'https://i.imgur.com/x7Hufmr.png');
                 this.load.image('bg_day_2', 'https://i.imgur.com/BVZCQ0e.png');
 
-                // Load character skins - Core skins from local Assets4game2, specialty/Decent ducks from remote imgur
+                // Character Skins - local & remote
                 this.load.image('duck', 'Assets4game2/duck-removebg-preview.png');
                 this.load.image('golden_duck', 'Assets4game2/golden_duck-removebg-preview.png');
                 this.load.image('cyber_duck', 'Assets4game2/cyber_duck__2_-removebg-preview.png');
@@ -752,7 +890,7 @@
                 this.load.image('decent_duck_9', 'https://i.imgur.com/aMIzw1g.png');
                 this.load.image('decent_duck_10', 'https://i.imgur.com/L5IXyoy.png');
 
-                // Load Items & Obstacles - utilizing Assets4game2
+                // Items & Obstacles - Assets4game2
                 this.load.image('balloon', 'Assets4game2/balloon-removebg-preview.png');
                 this.load.image('speed_boost', 'Assets4game2/boost-removebg-preview.png');
                 this.load.image('shield', 'Assets4game2/shield-removebg-preview.png');
@@ -765,13 +903,11 @@
                 this.load.image('rock', 'Assets4game2/rock-removebg-preview.png');
                 this.load.image('bird', 'Assets4game2/crow-removebg-preview.png');
                 
-                // Duplicate coin and pea for legacy references
                 this.load.image('star', 'Assets4game2/Coin-removebg-preview.png');
                 this.load.image('particle', 'Assets4game2/pea-removebg-preview.png');
             }
 
             create() {
-                // Initialize skin lists and HTML UI once loading is complete
                 Achievements.loadAchievements();
                 window.onGameLoaded();
                 this.scene.start('GameScene');
@@ -784,26 +920,29 @@
             create() {
                 const { width, height } = this.game.config;
 
+                // LAYER 0: Far Background Sky (tileSprite)
                 this.backgrounds = ['bg_day_1', 'bg_sunset', 'bg_night', 'bg_day_2'];
                 this.darkBackgrounds = ['bg_sunset', 'bg_night'];
                 this.currentBackgroundIndex = 0;
                 this.backgroundCycleTimer = 0;
-                this.background = this.add.tileSprite(0, 0, width, height, this.backgrounds[0]).setOrigin(0, 0);
+                this.background = this.add.tileSprite(0, 0, width, height, this.backgrounds[0]).setOrigin(0, 0).setDepth(0);
+
+                // LAYER 1: Parallax Midground Cityscape (tileSprite)
+                this.midground = this.add.tileSprite(0, 0, width, height, 'midground_city').setOrigin(0, 0).setDepth(1);
 
                 const sf = scaleFactor(this);
                 
-                // Player Duck Sprite
-                this.player = this.physics.add.sprite(80, 320, Achievements.selectedSkin || 'duck').setCollideWorldBounds(true);
+                // Player Duck Sprite (depth 10)
+                this.player = this.physics.add.sprite(80, 320, Achievements.selectedSkin || 'duck').setCollideWorldBounds(true).setDepth(10);
                 this.updatePlayerSkin();
                 
-                // Initially idle (game not started)
                 this.player.setGravityY(0);
                 this.isPlaying = false;
                 
-                // Shield Overlay Graphics
-                this.shieldGraphics = this.add.graphics();
+                // LAYER 15: Shield Graphics Overlay
+                this.shieldGraphics = this.add.graphics().setDepth(15);
 
-                // Initialize Physics Groups
+                // Initialize Physics Groups (depth 10)
                 this.peas = this.physics.add.group(); 
                 this.coins = this.physics.add.group(); 
                 this.stars = this.physics.add.group(); 
@@ -848,15 +987,19 @@
                 this.powerUpSpawnTimer = 0;
                 this.coinSpawnTimer = 0;
 
-                // Particle systems
-                this.powerUpParticles = this.add.particles('particle'); 
-                this.powerUpEmitter = this.powerUpParticles.createEmitter({ speed: { min: 30, max: 60 }, angle: { min: 0, max: 360 }, scale: { start: 0.2, end: 0 }, lifespan: 400, quantity: 5, on: false });
-                
-                this.hitParticles = this.add.particles('particle'); 
-                this.hitEmitter = this.hitParticles.createEmitter({ speed: { min: 50, max: 100 }, angle: { min: 0, max: 360 }, scale: { start: 0.3, end: 0 }, lifespan: 200, quantity: 8, on: false });
-                
-                this.speedTrail = this.add.particles('particle'); 
-                this.trailEmitter = this.speedTrail.createEmitter({ speed: 30, angle: 180, scale: { start: 0.1, end: 0 }, lifespan: 150, quantity: 1, on: false });
+                // LAYER 5: Jetpack Bubble Trail Emitter
+                this.trailParticles = this.add.particles('trail_particle').setDepth(5);
+                this.jetpackEmitter = this.trailParticles.createEmitter({
+                    speedY: { min: -10, max: 40 },
+                    speedX: { min: -140, max: -40 },
+                    angle: { min: 165, max: 195 },
+                    scale: { start: 0.9, end: 0.1 },
+                    alpha: { start: 0.7, end: 0 },
+                    lifespan: 500,
+                    frequency: -1, // Emitted manually during flight
+                    gravityY: 60,
+                    blendMode: 'ADD'
+                });
 
                 // Collisions/Overlaps
                 this.physics.add.overlap(this.player, this.peas, this.collectPea, null, this); 
@@ -908,7 +1051,7 @@
                 this.powerUpSpawnTimer = 0;
                 this.coinSpawnTimer = 0;
 
-                // Destroy active obstacles and items
+                // Destroy active objects
                 this.rocks.clear(true, true);
                 this.birds.clear(true, true);
                 this.balloons.clear(true, true);
@@ -920,38 +1063,54 @@
                 this.peaPods.clear(true, true);
                 this.magnets.clear(true, true);
 
-                // Setup player positioning & physics
+                // Setup player
                 this.player.setPosition(80, 320);
                 this.player.body.setVelocity(0, 0);
                 this.player.setGravityY(800);
                 this.updatePlayerSkin();
                 
                 this.isPlaying = true;
-
-                // Sync UI
                 updateHUD(this);
+            }
+
+            // Burst particle helper (instantiates dynamic visual explosions on canvas)
+            triggerExplosion(x, y, particleKey, count = 10) {
+                const manager = this.add.particles(particleKey).setDepth(12);
+                const emitter = manager.createEmitter({
+                    speed: { min: 40, max: 140 },
+                    angle: { min: 0, max: 360 },
+                    scale: { start: 0.6, end: 0 },
+                    alpha: { start: 0.9, end: 0 },
+                    lifespan: { min: 250, max: 550 },
+                    blendMode: 'ADD'
+                });
+                emitter.explode(count, x, y);
+                
+                // Cleanup particle manager
+                this.time.delayedCall(600, () => {
+                    manager.destroy();
+                });
             }
 
             update(time, delta) {
                 const deltaSeconds = delta / 1000;
 
                 if (!this.isPlaying) {
-                    // Main Menu Idle Loop
-                    // Scroll background slowly (20% base speed)
-                    this.background.tilePositionX += Global.baseScrollSpeed * deltaSeconds * 0.2;
-                    // Float player gently up and down
+                    // Slow idle parallax scroll for menu background
+                    this.background.tilePositionX += Global.baseScrollSpeed * deltaSeconds * 0.1;
+                    this.midground.tilePositionX += Global.baseScrollSpeed * deltaSeconds * 0.3;
+                    
                     this.player.y = 320 + Math.sin(time / 250) * 12;
                     this.player.body.setVelocity(0, 0);
                     
-                    // Clear shield drawing
                     this.shieldGraphics.clear();
+                    this.jetpackEmitter.stop();
                     return;
                 }
 
                 if (this.gameOverState) return;
 
-                // Dynamic speed calculation based on score + level
-                // Base speed scales by 10% per level + 15% per 600 points. Max scale capped at 2.5x.
+                // Dynamic speed calculation based on score + level (capped at 2.5x speed)
                 const speedScale = 1 + (this.level - 1) * 0.1 + (this.score / 600) * 0.15;
                 const clampedScale = Math.min(speedScale, 2.5);
 
@@ -961,10 +1120,11 @@
                     Global.currentScrollSpeed = Global.baseScrollSpeed * clampedScale;
                 }
 
-                // Scroll background
-                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.5;
+                // 3-Tier Parallax Scrolling
+                this.background.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.15; // Sky (15%)
+                this.midground.tilePositionX += Global.currentScrollSpeed * deltaSeconds * 0.45;  // City (45%)
 
-                // Background cycle cycle
+                // Background sky index cycle
                 this.backgroundCycleTimer += deltaSeconds;
                 if (this.backgroundCycleTimer >= 60) {
                     this.backgroundCycleTimer = 0;
@@ -972,23 +1132,26 @@
                     this.background.setTexture(this.backgrounds[this.currentBackgroundIndex]);
                 }
 
-                // Player Controls (Spacebar or Mouse Tap)
+                // Player flap controller
                 const isFlapping = this.isTouching || this.cursors.space.isDown;
                 this.player.body.setVelocityY(isFlapping ? -320 : this.player.body.velocity.y);
 
-                // Update Power-ups timers & effects
+                // Emit jetpack bubble trail when flying
+                if (isFlapping && this.player.body.velocity.y < 0) {
+                    this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
+                }
+
+                // Update Power-ups
                 this.updatePowerUps(deltaSeconds);
 
-                // Objects movement
+                // Move and spawn objects
                 this.updateObjects(deltaSeconds);
-
-                // Spawning items & obstacles
                 this.spawnObjects(deltaSeconds, clampedScale);
 
-                // Draw pulsing visual shield around player
+                // Draw pulsing cyan shield
                 this.drawShieldEffect(time);
 
-                // Update HTML HUD overlay
+                // HUD Sync
                 updateHUD(this);
             }
 
@@ -998,11 +1161,11 @@
                     const pulse = 0.6 + Math.sin(time / 120) * 0.2;
                     const radius = Math.max(this.player.displayHeight, this.player.displayWidth) * 0.68;
                     
-                    // Draw outer glow circle
+                    // Draw outer cyan glow
                     this.shieldGraphics.lineStyle(4, 0x00f2fe, 0.4 * pulse);
                     this.shieldGraphics.strokeCircle(this.player.x, this.player.y, radius + 4);
                     
-                    // Draw inner shield circle
+                    // Draw inner white shield line
                     this.shieldGraphics.lineStyle(2, 0xffffff, 0.8 * pulse);
                     this.shieldGraphics.strokeCircle(this.player.x, this.player.y, radius);
                 }
@@ -1014,13 +1177,7 @@
                     if (this.speedBoostTimer <= 0) {
                         this.speedBoostActive = false;
                         this.isInvincible = false;
-                        this.trailEmitter.stop();
-                    } else {
-                        this.trailEmitter.start();
-                        this.trailEmitter.setPosition(this.player.x - 20, this.player.y);
                     }
-                } else {
-                    this.trailEmitter.stop();
                 }
 
                 if (this.peaMultiplierActive) {
@@ -1051,7 +1208,7 @@
 
             updateObjects(deltaSeconds) {
                 const moveObj = (obj) => {
-                    obj.x -= Global.currentScrollSpeed * deltaSeconds;
+                    obj.x -= Global.currentScrollSpeed * deltaSeconds; // Move at full speed (100%)
                     if (obj.x < -60) obj.destroy();
                 };
                 
@@ -1084,7 +1241,7 @@
                     this.peaSpawnTimer = 0;
                 }
 
-                // Spawn Stars during Night
+                // Spawn Stars
                 if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') {
                     this.starSpawnTimer += deltaSeconds;
                     if (this.starSpawnTimer >= 8) {
@@ -1095,7 +1252,7 @@
                     }
                 }
 
-                // Spawn Obstacles (scaled spawn intervals based on speed multiplier)
+                // Spawn Obstacles (spawn interval scales dynamically with speed multiplier)
                 this.obstacleSpawnTimer += deltaSeconds;
                 const baseInterval = Math.max(0.5, 2.0 - (this.level * 0.1));
                 const scaledInterval = Math.max(0.4, baseInterval / speedMultiplier);
@@ -1113,7 +1270,7 @@
                     this.obstacleSpawnTimer = 0;
                 }
 
-                // Spawn Power-ups (one spawn every 24s randomly)
+                // Spawn Power-ups (one spawn every 24s)
                 this.powerUpSpawnTimer += deltaSeconds;
                 if (this.powerUpSpawnTimer >= 24) {
                     const powerUps = ['speed_boost', 'shield', 'pea_pod', 'magnet'];
@@ -1148,7 +1305,6 @@
                     this.level++;
                     this.pointsToNextLevel += 100 * this.level;
                     
-                    // Display floating level-up message
                     const sf = scaleFactor(this);
                     const txt = this.add.text(this.game.config.width / 2, 280, 'LEVEL UP!', {
                         fontFamily: 'Orbitron',
@@ -1157,6 +1313,7 @@
                         fontStyle: 'bold'
                     }).setOrigin(0.5).setDepth(100);
                     
+                    this.cameras.main.shake(150, 0.006);
                     this.time.delayedCall(1200, () => txt.destroy());
                 }
             }
@@ -1169,6 +1326,10 @@
                 if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') bonus *= 2;
                 
                 this.score += bonus;
+                
+                // Pea burst explosion particles
+                this.triggerExplosion(pea.x, pea.y, 'trail_particle', 5);
+                
                 this.checkLevelUp();
                 pea.destroy();
             }
@@ -1181,6 +1342,11 @@
                 if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') bonus *= 2;
                 
                 this.score += bonus;
+                
+                // Coin gold explosion particles + subtle camera shake
+                this.triggerExplosion(coin.x, coin.y, 'coin_particle', 12);
+                this.cameras.main.shake(100, 0.005);
+                
                 this.checkLevelUp();
                 coin.destroy();
             }
@@ -1193,6 +1359,11 @@
                 if (this.backgrounds[this.currentBackgroundIndex] === 'bg_night') bonus *= 2;
                 
                 this.score += bonus;
+                
+                // Gold star explosion particles + subtle camera shake
+                this.triggerExplosion(star.x, star.y, 'coin_particle', 15);
+                this.cameras.main.shake(120, 0.007);
+                
                 this.checkLevelUp();
                 star.destroy();
             }
@@ -1202,14 +1373,22 @@
                 this.speedBoostActive = true;
                 this.speedBoostTimer = 10;
                 this.isInvincible = true;
-                this.powerUpEmitter.emitParticleAt(sb.x, sb.y);
+                
+                // Particle explosion and camera shake
+                this.triggerExplosion(sb.x, sb.y, 'coin_particle', 18);
+                this.cameras.main.shake(150, 0.008);
+                
                 sb.destroy();
             }
 
             collectShield(p, s) {
                 if (this.gameOverState) return;
                 this.hasShield = true;
-                this.powerUpEmitter.emitParticleAt(s.x, s.y);
+                
+                // Particle explosion and camera shake
+                this.triggerExplosion(s.x, s.y, 'shield_particle', 18);
+                this.cameras.main.shake(150, 0.008);
+                
                 s.destroy();
             }
 
@@ -1217,7 +1396,11 @@
                 if (this.gameOverState) return;
                 this.peaMultiplierActive = true;
                 this.peaMultiplierTimer = 30;
-                this.powerUpEmitter.emitParticleAt(pp.x, pp.y);
+                
+                // Particle explosion and camera shake
+                this.triggerExplosion(pp.x, pp.y, 'trail_particle', 18);
+                this.cameras.main.shake(150, 0.008);
+                
                 pp.destroy();
             }
 
@@ -1225,7 +1408,11 @@
                 if (this.gameOverState) return;
                 this.magnetActive = true;
                 this.magnetTimer = 30;
-                this.powerUpEmitter.emitParticleAt(m.x, m.y);
+                
+                // Particle explosion and camera shake
+                this.triggerExplosion(m.x, m.y, 'trail_particle', 18);
+                this.cameras.main.shake(150, 0.008);
+                
                 m.destroy();
             }
 
@@ -1233,11 +1420,16 @@
                 if (this.gameOverState) return;
 
                 if (this.isInvincible) {
-                    this.hitEmitter.emitParticleAt(o.x, o.y);
+                    this.triggerExplosion(o.x, o.y, 'obstacle_particle', 15);
+                    this.cameras.main.shake(120, 0.006);
                     o.destroy();
                 } else if (this.hasShield) {
                     this.hasShield = false;
-                    this.hitEmitter.emitParticleAt(o.x, o.y);
+                    
+                    // Shield breaks - major cyan explosion particles + medium camera shake
+                    this.triggerExplosion(o.x, o.y, 'shield_particle', 22);
+                    this.cameras.main.shake(200, 0.012);
+                    
                     o.destroy();
                 } else {
                     // Trigger Game Over
@@ -1246,8 +1438,14 @@
                     this.player.body.setVelocity(0, 0);
                     this.player.setGravityY(0);
                     this.shieldGraphics.clear();
+                    this.jetpackEmitter.stop();
 
                     const finalScore = Math.floor(this.score);
+                    
+                    // Crash explosion particles + major camera shake
+                    this.triggerExplosion(this.player.x, this.player.y, 'obstacle_particle', 30);
+                    this.cameras.main.shake(300, 0.020);
+
                     let high = parseInt(localStorage.getItem("duckJoyrideHighScore") || 0);
                     if (finalScore > high) {
                         localStorage.setItem("duckJoyrideHighScore", finalScore);
@@ -1272,7 +1470,6 @@
 
         // --- DUCK JOYRIDE HTML UI MANAGER ---
 
-        // HTML Screens Elements
         const screens = {
             start: document.getElementById('screen-start'),
             how: document.getElementById('screen-how'),
@@ -1282,10 +1479,9 @@
             hud: document.getElementById('hud-overlay')
         };
 
-        // Show a specific screen, hide others
         function showScreen(targetScreenName) {
             Object.keys(screens).forEach(key => {
-                if (key === 'hud') return; // HUD handled separately
+                if (key === 'hud') return; 
                 if (key === targetScreenName) {
                     screens[key].classList.remove('hidden');
                 } else {
@@ -1294,7 +1490,6 @@
             });
         }
 
-        // Update real-time HUD elements
         function updateHUD(scene) {
             document.getElementById('hud-score').innerText = `SCORE: ${Math.floor(scene.score)}`;
             document.getElementById('hud-level').innerText = `Level ${scene.level}`;
@@ -1340,14 +1535,12 @@
             }
         }
 
-        // Populate High Scores in HTML UI
         function refreshHighScores() {
             const highVal = localStorage.getItem("duckJoyrideHighScore") || 0;
             document.getElementById('start-high-score').innerText = highVal;
             document.getElementById('go-high-score').innerText = highVal;
         }
 
-        // HTML Skins grid population
         function populateSkinsGrid(category) {
             const grid = document.getElementById('skins-grid');
             grid.innerHTML = '';
@@ -1399,7 +1592,6 @@
                         Achievements.setSkin(skin.name);
                         populateSkinsGrid(category);
                         
-                        // Dynamically update texture in running scene
                         const gameScene = game.scene.keys.GameScene;
                         if (gameScene) {
                             gameScene.updatePlayerSkin();
@@ -1411,7 +1603,6 @@
             });
         }
 
-        // Window callbacks triggered by Phaser PreloaderScene
         window.onGameLoaded = function() {
             refreshHighScores();
             showScreen('start');
@@ -1427,9 +1618,8 @@
 
         // --- BUTTON LISTENER ASSIGNMENT ---
 
-        // Start button clicked
         document.getElementById('btn-start').addEventListener('click', () => {
-            showScreen(''); // Hide all screens
+            showScreen(''); 
             screens.hud.classList.remove('hidden');
             const gameScene = game.scene.keys.GameScene;
             if (gameScene) {
@@ -1437,13 +1627,11 @@
             }
         });
 
-        // Skins button clicked
         document.getElementById('btn-skins').addEventListener('click', () => {
             populateSkinsGrid('og');
             showScreen('skins');
         });
 
-        // Tabs skin selection toggles
         document.getElementById('tab-og').addEventListener('click', (e) => {
             document.getElementById('tab-decent').classList.remove('active');
             e.target.classList.add('active');
@@ -1456,12 +1644,10 @@
             populateSkinsGrid('decent');
         });
 
-        // Back from skins
         document.getElementById('btn-skins-back').addEventListener('click', () => {
             showScreen('start');
         });
 
-        // How to play button clicked
         document.getElementById('btn-how').addEventListener('click', () => {
             showScreen('how');
         });
@@ -1470,7 +1656,6 @@
             showScreen('start');
         });
 
-        // Leaderboard button clicked
         document.getElementById('btn-leaderboard').addEventListener('click', () => {
             showScreen('leaderboard');
         });
@@ -1479,7 +1664,6 @@
             showScreen('start');
         });
 
-        // Restart button (Redeploy) clicked
         document.getElementById('btn-restart').addEventListener('click', () => {
             showScreen('');
             screens.hud.classList.remove('hidden');
@@ -1489,7 +1673,6 @@
             }
         });
 
-        // Return to Menu from Game Over
         document.getElementById('btn-go-menu').addEventListener('click', () => {
             Achievements.resetSession();
             refreshHighScores();
