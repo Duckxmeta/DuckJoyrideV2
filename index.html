@@ -832,7 +832,20 @@
                 { name: 'duck', label: 'Classic Duck', price: 0, image: 'Assets4game2/duck-removebg-preview.png', desc: 'Standard issue yellow duck.' },
                 { name: 'cyber_duck', label: 'Cyber Duck', price: 250, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.' },
                 { name: 'golden_duck', label: 'Golden Duck', price: 600, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.' },
-                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1200, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' }
+                { name: 'rainbow_duck', label: 'Rainbow Duck', price: 800, image: 'Assets4game2/rainbow_duck-removebg-preview.png', desc: 'Prismatic hyper-color coating.' },
+                { name: 'fire_duck', label: 'Fire Duck', price: 1000, image: 'https://i.imgur.com/HWEElmk.png', desc: 'Forged from deep volcanos.' },
+                { name: 'ice_duck', label: 'Ice Duck', price: 1000, image: 'https://i.imgur.com/Xt85ys5.png', desc: 'Cryogenic zero-degree frost.' },
+                { name: 'toxic_duck', label: 'Toxic Duck', price: 1000, image: 'https://i.imgur.com/suaE0NI.png', desc: 'Biohazard nuclear sludge glow.' },
+                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1200, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' },
+                { name: 'decent_duck_2', label: 'Decent #682', price: 1200, image: 'https://i.imgur.com/TapqnPm.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_3', label: 'Decent #817', price: 1200, image: 'https://i.imgur.com/Nq6sMSC.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_4', label: 'Decent #162', price: 1200, image: 'https://i.imgur.com/5UCdZF5.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_5', label: 'Decent #313', price: 1200, image: 'https://i.imgur.com/t46FqIo.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_6', label: 'Decent #128', price: 1200, image: 'https://i.imgur.com/KCVhEtT.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_7', label: 'Decent #123', price: 1200, image: 'https://i.imgur.com/YPxFYPk.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_8', label: 'Decent #477', price: 1200, image: 'https://i.imgur.com/nNGLub1.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_9', label: 'Decent #135', price: 1200, image: 'https://i.imgur.com/aMIzw1g.png', desc: 'Modern Web3 arcade collector item.' },
+                { name: 'decent_duck_10', label: 'Decent #291', price: 1200, image: 'https://i.imgur.com/L5IXyoy.png', desc: 'Modern Web3 arcade collector item.' }
             ],
             
             trails: [
@@ -1999,9 +2012,9 @@
                 
                 this.score += bonus;
                 
-                // Track coin stats
-                this.coinsCollectedThisRun++;
-                Achievements.totalCoinsCollected++;
+                // Track coin stats (5x multiplier)
+                this.coinsCollectedThisRun += 5;
+                Achievements.totalCoinsCollected += 5;
                 Achievements.saveAchievements();
 
                 this.triggerExplosion(coin.x, coin.y, 'coin_particle', 12);
@@ -2227,8 +2240,8 @@
 
             filtered.forEach(skin => {
                 const achievement = skin.key ? Achievements.achievements[skin.key] : null;
-                const isUnlocked = skin.unlocked || (achievement ? achievement.unlocked : false);
-                const isSelected = Achievements.selectedSkin === skin.name;
+                const isUnlocked = (skin.name === 'duck') || (achievement ? achievement.unlocked : false) || CosmeticShop.unlockedSkins.includes(skin.name);
+                const isSelected = Achievements.selectedSkin === skin.name || CosmeticShop.equippedSkin === skin.name;
 
                 if (!isUnlocked && achievement?.hidden) {
                     return; 
@@ -2247,6 +2260,8 @@
                 if (isUnlocked) {
                     card.addEventListener('click', () => {
                         Achievements.setSkin(skin.name);
+                        CosmeticShop.equippedSkin = skin.name;
+                        CosmeticShop.saveData();
                         populateSkinsGrid(category);
                         
                         const gameScene = game.scene.keys.GameScene;
