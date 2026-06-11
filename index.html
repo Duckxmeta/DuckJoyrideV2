@@ -602,6 +602,7 @@
                 
                 <div class="menu-buttons">
                     <button id="btn-start" class="btn-primary font-orbitron">START MISSION</button>
+                    <button id="btn-shop" class="btn-primary font-orbitron" style="background: linear-gradient(90deg, #ffd700 0%, #f39c12 100%); color: #070714; box-shadow: 0 0 15px var(--color-gold-glow);">COSMETIC SHOP</button>
                     <button id="btn-skins" class="btn-secondary font-orbitron">SKINS HANGAR</button>
                     <button id="btn-how" class="btn-secondary font-orbitron">HOW TO PLAY</button>
                     <button id="btn-leaderboard" class="btn-secondary font-orbitron">LEADERBOARD</button>
@@ -639,6 +640,24 @@
                 </div>
 
                 <button id="btn-skins-back" class="btn-secondary font-orbitron">BACK</button>
+            </div>
+
+            <!-- Shop Screen -->
+            <div id="screen-shop" class="ui-screen hidden">
+                <h2 class="screen-title font-orbitron" style="border-bottom-color: #ffd700; box-shadow: 0 4px 10px -5px var(--color-gold-glow);">COSMETIC SHOP</h2>
+                
+                <div class="high-score-container font-inter" style="border-color: rgba(255, 215, 0, 0.3);">
+                    <span>YOUR COINS</span>
+                    <span id="shop-coin-balance" class="high-score-val font-orbitron" style="color: #ffd700; text-shadow: 0 0 10px var(--color-gold-glow);">0</span>
+                </div>
+
+                <div class="skins-grid-container" style="height: 280px;">
+                    <div id="shop-grid" class="skins-grid">
+                        <!-- Filled dynamically by JavaScript -->
+                    </div>
+                </div>
+
+                <button id="btn-shop-back" class="btn-secondary font-orbitron">BACK</button>
             </div>
 
             <!-- Leaderboard Screen -->
@@ -756,6 +775,79 @@
             setSkin(skinName) {
                 this.selectedSkin = skinName;
                 this.saveAchievements();
+            }
+        };
+
+        // --- COSMETIC SHOP & COIN BALANCES SYSTEM ---
+        const CosmeticShop = {
+            totalCoinsBalance: 0,
+            unlockedSkins: ['duck'],
+            equippedSkin: 'duck',
+            
+            skins: [
+                { name: 'duck', label: 'Classic Duck', price: 0, image: 'Assets4game2/duck-removebg-preview.png', desc: 'Standard issue yellow duck.' },
+                { name: 'cyber_duck', label: 'Cyber Duck', price: 200, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.' },
+                { name: 'golden_duck', label: 'Golden Duck', price: 500, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.' },
+                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1000, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' }
+            ],
+            
+            loadData() {
+                const savedCoins = localStorage.getItem("duckJoyrideCoins");
+                if (savedCoins !== null) {
+                    this.totalCoinsBalance = parseInt(savedCoins) || 0;
+                } else {
+                    this.totalCoinsBalance = 0;
+                }
+                
+                const savedUnlocked = localStorage.getItem("duckJoyrideUnlockedSkins");
+                if (savedUnlocked) {
+                    this.unlockedSkins = JSON.parse(savedUnlocked) || ['duck'];
+                } else {
+                    this.unlockedSkins = ['duck'];
+                }
+                
+                const savedEquipped = localStorage.getItem("duckJoyrideEquippedSkin");
+                if (savedEquipped) {
+                    this.equippedSkin = savedEquipped;
+                } else {
+                    this.equippedSkin = 'duck';
+                }
+                
+                // Sync equipped skin to selectedSkin for Phaser textures
+                Achievements.selectedSkin = this.equippedSkin;
+            },
+            
+            saveData() {
+                localStorage.setItem("duckJoyrideCoins", this.totalCoinsBalance);
+                localStorage.setItem("duckJoyrideUnlockedSkins", JSON.stringify(this.unlockedSkins));
+                localStorage.setItem("duckJoyrideEquippedSkin", this.equippedSkin);
+                
+                Achievements.selectedSkin = this.equippedSkin;
+            },
+            
+            addCoins(amount) {
+                this.totalCoinsBalance += amount;
+                this.saveData();
+            },
+            
+            buySkin(name) {
+                const skin = this.skins.find(s => s.name === name);
+                if (skin && !this.unlockedSkins.includes(name) && this.totalCoinsBalance >= skin.price) {
+                    this.totalCoinsBalance -= skin.price;
+                    this.unlockedSkins.push(name);
+                    this.saveData();
+                    return true;
+                }
+                return false;
+            },
+            
+            equipSkin(name) {
+                if (this.unlockedSkins.includes(name)) {
+                    this.equippedSkin = name;
+                    this.saveData();
+                    return true;
+                }
+                return false;
             }
         };
 
@@ -1788,6 +1880,7 @@
                         Achievements.consecutiveDeaths = 0;
                     }
 
+                    CosmeticShop.addCoins(this.coinsCollectedThisRun);
                     window.showGameOver(finalScore, this.coinsCollectedThisRun);
                 }
 
@@ -1803,7 +1896,8 @@
             skins: document.getElementById('screen-skins'),
             leaderboard: document.getElementById('screen-leaderboard'),
             gameOver: document.getElementById('screen-game-over'),
-            hud: document.getElementById('hud-overlay')
+            hud: document.getElementById('hud-overlay'),
+            shop: document.getElementById('screen-shop')
         };
 
         function showScreen(targetScreenName) {
@@ -1931,13 +2025,73 @@
             });
         }
 
+        // HTML Shop grid population
+        function populateShopGrid() {
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = '';
+            
+            // Sync coin display
+            document.getElementById('shop-coin-balance').innerText = CosmeticShop.totalCoinsBalance;
+            
+            CosmeticShop.skins.forEach(skin => {
+                const isUnlocked = CosmeticShop.unlockedSkins.includes(skin.name);
+                const isEquipped = CosmeticShop.equippedSkin === skin.name;
+                
+                const card = document.createElement('div');
+                card.className = `skin-card ${isEquipped ? 'selected' : ''}`;
+                
+                let buttonHTML = '';
+                if (isEquipped) {
+                    buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
+                } else if (isUnlocked) {
+                    buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
+                } else {
+                    const canAfford = CosmeticShop.totalCoinsBalance >= skin.price;
+                    buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${skin.price}</button>`;
+                }
+                
+                card.innerHTML = `
+                    <img class="skin-preview" src="${skin.image}" alt="${skin.label}">
+                    <div class="skin-name">${skin.label}</div>
+                    <div class="skin-desc" style="font-size: 7.5px;">${skin.desc}</div>
+                    <div style="width: 100%; margin-top: 4px;">${buttonHTML}</div>
+                `;
+                
+                if (!isEquipped) {
+                    if (isUnlocked) {
+                        card.querySelector('.btn-equip').addEventListener('click', () => {
+                            CosmeticShop.equipSkin(skin.name);
+                            populateShopGrid();
+                            
+                            const gameScene = game.scene.keys.GameScene;
+                            if (gameScene) {
+                                gameScene.updatePlayerSkin();
+                            }
+                        });
+                    } else {
+                        const buyBtn = card.querySelector('.btn-buy');
+                        if (buyBtn && CosmeticShop.totalCoinsBalance >= skin.price) {
+                            buyBtn.addEventListener('click', () => {
+                                CosmeticShop.buySkin(skin.name);
+                                populateShopGrid();
+                            });
+                        }
+                    }
+                }
+                
+                grid.appendChild(card);
+            });
+        }
+
         window.onGameLoaded = function() {
+            CosmeticShop.loadData();
             refreshHighScores();
             showScreen('start');
             populateSkinsGrid('og');
         };
 
         window.showGameOver = function(score, coins) {
+            CosmeticShop.loadData(); // Ensure fresh balances loaded
             refreshHighScores();
             document.getElementById('go-score').innerText = score;
             document.getElementById('go-coins').innerText = coins;
@@ -1959,6 +2113,16 @@
         document.getElementById('btn-skins').addEventListener('click', () => {
             populateSkinsGrid('og');
             showScreen('skins');
+        });
+
+        // Shop button click
+        document.getElementById('btn-shop').addEventListener('click', () => {
+            populateShopGrid();
+            showScreen('shop');
+        });
+
+        document.getElementById('btn-shop-back').addEventListener('click', () => {
+            showScreen('start');
         });
 
         document.getElementById('tab-og').addEventListener('click', (e) => {
