@@ -599,6 +599,10 @@
         .powerup-badge.hidden {
             display: none !important;
         }
+        #redeem-input:focus {
+            border-color: var(--color-primary) !important;
+            box-shadow: 0 0 8px var(--color-primary-glow) !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
 </head>
@@ -697,10 +701,16 @@
                     <button id="shop-tab-trails" class="tab-btn font-orbitron">TRAILS</button>
                 </div>
 
-                <div class="skins-grid-container" style="height: 250px;">
+                <div class="skins-grid-container" style="height: 220px;">
                     <div id="shop-grid" class="skins-grid">
                         <!-- Filled dynamically by JavaScript -->
                     </div>
+                </div>
+
+                <!-- Passcode Redeem System -->
+                <div id="redeem-container" style="display: flex; gap: 8px; width: 90%; margin-top: 5px; justify-content: center; align-items: center;">
+                    <input type="text" id="redeem-input" placeholder="ENTER PASSCODE..." class="font-orbitron" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); color: #fff; text-align: center; font-size: 11px; outline: none; transition: border-color 0.3s;" />
+                    <button id="btn-redeem" class="btn-primary font-orbitron" style="padding: 10px 16px; font-size: 11px; margin: 0; background: linear-gradient(90deg, var(--color-primary) 0%, #0099ff 100%); color: #070714; border: none; box-shadow: 0 0 10px var(--color-primary-glow);">REDEEM</button>
                 </div>
 
                 <button id="btn-shop-back" class="btn-secondary font-orbitron">BACK</button>
@@ -2411,6 +2421,8 @@
                         buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
                     } else if (isUnlocked) {
                         buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
+                    } else if (skin.name.startsWith('decent_duck')) {
+                        buttonHTML = `<button class="btn-secondary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%; color: var(--color-secondary); border-color: var(--color-secondary); cursor: not-allowed;" disabled>CODE REQUIRED</button>`;
                     } else {
                         const canAfford = CosmeticShop.totalCoinsBalance >= skin.price;
                         buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${skin.price}</button>`;
@@ -2437,7 +2449,7 @@
                                     }
                                 }
                             });
-                        } else {
+                        } else if (!skin.name.startsWith('decent_duck')) {
                             const buyBtn = card.querySelector('.btn-buy');
                             if (buyBtn && CosmeticShop.totalCoinsBalance >= skin.price) {
                                 buyBtn.addEventListener('click', () => {
@@ -2613,6 +2625,54 @@
             Achievements.resetSession();
             refreshHighScores();
             showScreen('start');
+        });
+
+        // --- PASSCODE REDEEM FUNCTION ---
+        function checkUnlockCode(inputCode) {
+            const cleanCode = inputCode.trim().toUpperCase();
+            if (cleanCode.startsWith(':DECENTDUCKS')) {
+                const suffix = cleanCode.replace(':DECENTDUCKS', '');
+                let targetSkinName = '';
+                if (suffix === '1' || suffix === '') {
+                    targetSkinName = 'decent_duck';
+                } else {
+                    const num = parseInt(suffix);
+                    if (num >= 2 && num <= 10) {
+                        targetSkinName = 'decent_duck_' + num;
+                    }
+                }
+                
+                if (targetSkinName) {
+                    if (!CosmeticShop.unlockedSkins.includes(targetSkinName)) {
+                        CosmeticShop.unlockedSkins.push(targetSkinName);
+                        CosmeticShop.saveData();
+                        populateShopGrid();
+                        populateSkinsGrid('decent');
+                        
+                        const skinLabel = CosmeticShop.skins.find(s => s.name === targetSkinName).label;
+                        alert(`UNLOCKED: ${skinLabel}!`);
+                        return true;
+                    } else {
+                        alert('ALREADY UNLOCKED!');
+                        return true;
+                    }
+                }
+            }
+            alert('INVALID PASSCODE');
+            return false;
+        }
+
+        document.getElementById('btn-redeem').addEventListener('click', () => {
+            const input = document.getElementById('redeem-input');
+            const result = checkUnlockCode(input.value);
+            if (result) {
+                input.value = '';
+                input.style.borderColor = '#39ff14';
+                setTimeout(() => input.style.borderColor = '', 1500);
+            } else {
+                input.style.borderColor = 'var(--color-secondary)';
+                setTimeout(() => input.style.borderColor = '', 1500);
+            }
         });
 
         // --- CLICK BURST MECHANIC ---
