@@ -701,16 +701,10 @@
                     <button id="shop-tab-trails" class="tab-btn font-orbitron">TRAILS</button>
                 </div>
 
-                <div class="skins-grid-container" style="height: 220px;">
+                <div class="skins-grid-container" style="height: 270px;">
                     <div id="shop-grid" class="skins-grid">
                         <!-- Filled dynamically by JavaScript -->
                     </div>
-                </div>
-
-                <!-- Passcode Redeem System -->
-                <div id="redeem-container" style="display: flex; gap: 8px; width: 90%; margin-top: 5px; justify-content: center; align-items: center;">
-                    <input type="text" id="redeem-input" placeholder="ENTER PASSCODE..." class="font-orbitron" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); color: #fff; text-align: center; font-size: 11px; outline: none; transition: border-color 0.3s;" />
-                    <button id="btn-redeem" class="btn-primary font-orbitron" style="padding: 10px 16px; font-size: 11px; margin: 0; background: linear-gradient(90deg, var(--color-primary) 0%, #0099ff 100%); color: #070714; border: none; box-shadow: 0 0 10px var(--color-primary-glow);">REDEEM</button>
                 </div>
 
                 <button id="btn-shop-back" class="btn-secondary font-orbitron">BACK</button>
@@ -844,23 +838,23 @@
             activeTab: 'skins',
             
             skins: [
-                { name: 'duck', label: 'Classic Duck', price: 0, image: 'Assets4game2/duck-removebg-preview.png', desc: 'Standard issue yellow duck.' },
-                { name: 'cyber_duck', label: 'Cyber Duck', price: 250, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.' },
-                { name: 'golden_duck', label: 'Golden Duck', price: 600, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.' },
-                { name: 'rainbow_duck', label: 'Rainbow Duck', price: 800, image: 'Assets4game2/rainbow_duck-removebg-preview.png', desc: 'Prismatic hyper-color coating.' },
-                { name: 'fire_duck', label: 'Fire Duck', price: 1000, image: 'https://i.imgur.com/HWEElmk.png', desc: 'Forged from deep volcanos.' },
-                { name: 'ice_duck', label: 'Ice Duck', price: 1000, image: 'https://i.imgur.com/Xt85ys5.png', desc: 'Cryogenic zero-degree frost.' },
-                { name: 'toxic_duck', label: 'Toxic Duck', price: 1000, image: 'https://i.imgur.com/suaE0NI.png', desc: 'Biohazard nuclear sludge glow.' },
-                { name: 'decent_duck', label: 'Decent Duck Hero', price: 1200, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.' },
-                { name: 'decent_duck_2', label: 'Decent #682', price: 1200, image: 'https://i.imgur.com/TapqnPm.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_3', label: 'Decent #817', price: 1200, image: 'https://i.imgur.com/Nq6sMSC.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_4', label: 'Decent #162', price: 1200, image: 'https://i.imgur.com/5UCdZF5.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_5', label: 'Decent #313', price: 1200, image: 'https://i.imgur.com/t46FqIo.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_6', label: 'Decent #128', price: 1200, image: 'https://i.imgur.com/KCVhEtT.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_7', label: 'Decent #123', price: 1200, image: 'https://i.imgur.com/YPxFYPk.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_8', label: 'Decent #477', price: 1200, image: 'https://i.imgur.com/nNGLub1.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_9', label: 'Decent #135', price: 1200, image: 'https://i.imgur.com/aMIzw1g.png', desc: 'Modern Web3 arcade collector item.' },
-                { name: 'decent_duck_10', label: 'Decent #291', price: 1200, image: 'https://i.imgur.com/L5IXyoy.png', desc: 'Modern Web3 arcade collector item.' }
+                { name: 'duck', label: 'Classic Duck', price: 0, image: 'Assets4game2/duck-removebg-preview.png', desc: 'Standard issue yellow duck.', isNFT: false },
+                { name: 'cyber_duck', label: 'Cyber Duck', price: 250, image: 'Assets4game2/cyber_duck__2_-removebg-preview.png', desc: 'Neon purple cybernetic upgrade.', isNFT: false },
+                { name: 'golden_duck', label: 'Golden Duck', price: 600, image: 'Assets4game2/golden_duck-removebg-preview.png', desc: 'Solid 24k gold chassis.', isNFT: false },
+                { name: 'rainbow_duck', label: 'Rainbow Duck', price: 800, image: 'Assets4game2/rainbow_duck-removebg-preview.png', desc: 'Prismatic hyper-color coating.', isNFT: false },
+                { name: 'fire_duck', label: 'Fire Duck', price: 1000, image: 'https://i.imgur.com/HWEElmk.png', desc: 'Forged from deep volcanos.', isNFT: false },
+                { name: 'ice_duck', label: 'Ice Duck', price: 1000, image: 'https://i.imgur.com/Xt85ys5.png', desc: 'Cryogenic zero-degree frost.', isNFT: false },
+                { name: 'toxic_duck', label: 'Toxic Duck', price: 1000, image: 'https://i.imgur.com/suaE0NI.png', desc: 'Biohazard nuclear sludge glow.', isNFT: false },
+                { name: 'decent_duck', label: 'Decent #233', price: 1200, image: 'https://i.imgur.com/4t0d1Ab.png', desc: 'Legendary premium Web3 pilot.', isNFT: true },
+                { name: 'decent_duck_2', label: 'Decent #682', price: 1200, image: 'https://i.imgur.com/TapqnPm.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_3', label: 'Decent #817', price: 1200, image: 'https://i.imgur.com/Nq6sMSC.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_4', label: 'Decent #162', price: 1200, image: 'https://i.imgur.com/5UCdZF5.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_5', label: 'Decent #313', price: 1200, image: 'https://i.imgur.com/t46FqIo.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_6', label: 'Decent #128', price: 1200, image: 'https://i.imgur.com/KCVhEtT.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_7', label: 'Decent #123', price: 1200, image: 'https://i.imgur.com/YPxFYPk.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_8', label: 'Decent #477', price: 1200, image: 'https://i.imgur.com/nNGLub1.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_9', label: 'Decent #135', price: 1200, image: 'https://i.imgur.com/aMIzw1g.png', desc: 'Modern Web3 arcade collector item.', isNFT: true },
+                { name: 'decent_duck_10', label: 'Decent #291', price: 1200, image: 'https://i.imgur.com/L5IXyoy.png', desc: 'Modern Web3 arcade collector item.', isNFT: true }
             ],
             
             trails: [
@@ -2344,16 +2338,16 @@
                 { name: 'ice_duck', key: 'ice_duck', label: 'Ice Duck', image: 'https://i.imgur.com/Xt85ys5.png', category: 'og' },
                 { name: 'toxic_duck', key: 'toxic_duck', label: 'Toxic Duck', image: 'https://i.imgur.com/suaE0NI.png', category: 'og' },
                 
-                { name: 'decent_duck', label: 'Decent #233', image: 'https://i.imgur.com/4t0d1Ab.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_2', label: 'Decent #682', image: 'https://i.imgur.com/TapqnPm.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_3', label: 'Decent #817', image: 'https://i.imgur.com/Nq6sMSC.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_4', label: 'Decent #162', image: 'https://i.imgur.com/5UCdZF5.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_5', label: 'Decent #313', image: 'https://i.imgur.com/t46FqIo.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_6', label: 'Decent #128', image: 'https://i.imgur.com/KCVhEtT.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_7', label: 'Decent #123', image: 'https://i.imgur.com/YPxFYPk.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_8', label: 'Decent #477', image: 'https://i.imgur.com/nNGLub1.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_9', label: 'Decent #135', image: 'https://i.imgur.com/aMIzw1g.png', unlocked: true, category: 'decent' },
-                { name: 'decent_duck_10', label: 'Decent #291', image: 'https://i.imgur.com/L5IXyoy.png', unlocked: true, category: 'decent' }
+                { name: 'decent_duck', label: 'Decent #233', image: 'https://i.imgur.com/4t0d1Ab.png', category: 'decent' },
+                { name: 'decent_duck_2', label: 'Decent #682', image: 'https://i.imgur.com/TapqnPm.png', category: 'decent' },
+                { name: 'decent_duck_3', label: 'Decent #817', image: 'https://i.imgur.com/Nq6sMSC.png', category: 'decent' },
+                { name: 'decent_duck_4', label: 'Decent #162', image: 'https://i.imgur.com/5UCdZF5.png', category: 'decent' },
+                { name: 'decent_duck_5', label: 'Decent #313', image: 'https://i.imgur.com/t46FqIo.png', category: 'decent' },
+                { name: 'decent_duck_6', label: 'Decent #128', image: 'https://i.imgur.com/KCVhEtT.png', category: 'decent' },
+                { name: 'decent_duck_7', label: 'Decent #123', image: 'https://i.imgur.com/YPxFYPk.png', category: 'decent' },
+                { name: 'decent_duck_8', label: 'Decent #477', image: 'https://i.imgur.com/nNGLub1.png', category: 'decent' },
+                { name: 'decent_duck_9', label: 'Decent #135', image: 'https://i.imgur.com/aMIzw1g.png', category: 'decent' },
+                { name: 'decent_duck_10', label: 'Decent #291', image: 'https://i.imgur.com/L5IXyoy.png', category: 'decent' }
             ];
 
             const filtered = allSkins.filter(s => s.category === category);
@@ -2421,8 +2415,14 @@
                         buttonHTML = `<button class="btn-primary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%;" disabled>EQUIPPED</button>`;
                     } else if (isUnlocked) {
                         buttonHTML = `<button class="btn-secondary font-orbitron btn-equip" style="font-size: 8px; padding: 6px 12px; width: 100%; border-color: var(--color-primary);">EQUIP</button>`;
-                    } else if (skin.name.startsWith('decent_duck')) {
-                        buttonHTML = `<button class="btn-secondary font-orbitron" style="font-size: 8px; padding: 6px 12px; width: 100%; color: var(--color-secondary); border-color: var(--color-secondary); cursor: not-allowed;" disabled>CODE REQUIRED</button>`;
+                    } else if (skin.isNFT) {
+                        buttonHTML = `
+                            <div class="slot-lock-label font-orbitron" style="font-size: 7px; color: var(--color-secondary); margin-bottom: 2px;">LOCKED (ENTER CODE)</div>
+                            <div style="display: flex; gap: 4px; width: 100%;">
+                                <input type="text" placeholder="CODE..." class="slot-code-input font-orbitron" data-skin="${skin.name}" style="flex: 1; padding: 4px; border-radius: 4px; border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.05); color: #fff; font-size: 8px; outline: none; text-align: center;" />
+                                <button class="btn-primary font-orbitron slot-code-btn" data-skin="${skin.name}" style="padding: 4px 6px; font-size: 8px; margin: 0; background: var(--color-secondary); border: none; box-shadow: 0 0 5px rgba(255, 0, 127, 0.4); color: #fff;">GO</button>
+                            </div>
+                        `;
                     } else {
                         const canAfford = CosmeticShop.totalCoinsBalance >= skin.price;
                         buttonHTML = `<button class="btn-primary font-orbitron btn-buy" style="font-size: 8px; padding: 6px 12px; width: 100%; background: ${canAfford ? 'var(--color-primary)' : '#4b5563'}; border: none; box-shadow: ${canAfford ? '0 0 10px var(--color-primary-glow)' : 'none'};" ${canAfford ? '' : 'disabled'}>BUY: ${skin.price}</button>`;
@@ -2449,7 +2449,24 @@
                                     }
                                 }
                             });
-                        } else if (!skin.name.startsWith('decent_duck')) {
+                        } else if (skin.isNFT) {
+                            const redeemBtn = card.querySelector('.slot-code-btn');
+                            const redeemInput = card.querySelector('.slot-code-input');
+                            
+                            if (redeemBtn && redeemInput) {
+                                redeemBtn.addEventListener('click', () => {
+                                    const code = redeemInput.value;
+                                    const success = checkUnlockCodeForSpecificSkin(code, skin.name);
+                                    if (success) {
+                                        redeemInput.value = '';
+                                        populateShopGrid();
+                                    } else {
+                                        redeemInput.style.borderColor = 'var(--color-secondary)';
+                                        setTimeout(() => redeemInput.style.borderColor = '', 1500);
+                                    }
+                                });
+                            }
+                        } else {
                             const buyBtn = card.querySelector('.btn-buy');
                             if (buyBtn && CosmeticShop.totalCoinsBalance >= skin.price) {
                                 buyBtn.addEventListener('click', () => {
@@ -2628,52 +2645,57 @@
         });
 
         // --- PASSCODE REDEEM FUNCTION ---
-        function checkUnlockCode(inputCode) {
+        function checkUnlockCodeForSpecificSkin(inputCode, skinName) {
             const cleanCode = inputCode.trim().toUpperCase();
-            if (cleanCode.startsWith(':DECENTDUCKS')) {
-                const suffix = cleanCode.replace(':DECENTDUCKS', '');
-                let targetSkinName = '';
-                if (suffix === '1' || suffix === '') {
-                    targetSkinName = 'decent_duck';
-                } else {
-                    const num = parseInt(suffix);
-                    if (num >= 2 && num <= 10) {
-                        targetSkinName = 'decent_duck_' + num;
-                    }
-                }
-                
-                if (targetSkinName) {
-                    if (!CosmeticShop.unlockedSkins.includes(targetSkinName)) {
-                        CosmeticShop.unlockedSkins.push(targetSkinName);
-                        CosmeticShop.saveData();
-                        populateShopGrid();
-                        populateSkinsGrid('decent');
-                        
-                        const skinLabel = CosmeticShop.skins.find(s => s.name === targetSkinName).label;
-                        alert(`UNLOCKED: ${skinLabel}!`);
-                        return true;
-                    } else {
-                        alert('ALREADY UNLOCKED!');
-                        return true;
-                    }
-                }
+            if (!cleanCode.startsWith(':DECENTDUCKS')) {
+                alert('INVALID PASSCODE FORMAT (MUST START WITH :DECENTDUCKS)');
+                return false;
             }
-            alert('INVALID PASSCODE');
-            return false;
-        }
-
-        document.getElementById('btn-redeem').addEventListener('click', () => {
-            const input = document.getElementById('redeem-input');
-            const result = checkUnlockCode(input.value);
-            if (result) {
-                input.value = '';
-                input.style.borderColor = '#39ff14';
-                setTimeout(() => input.style.borderColor = '', 1500);
+            
+            const suffix = cleanCode.replace(':DECENTDUCKS', '');
+            let targetSkinName = '';
+            
+            if (suffix === '1' || suffix === '233' || suffix === 'HERO' || suffix === '') {
+                targetSkinName = 'decent_duck';
             } else {
-                input.style.borderColor = 'var(--color-secondary)';
-                setTimeout(() => input.style.borderColor = '', 1500);
+                const num = parseInt(suffix);
+                if (num >= 2 && num <= 10) {
+                    targetSkinName = 'decent_duck_' + num;
+                }
             }
-        });
+            
+            // Fallback matching by label NFT digits
+            if (!targetSkinName) {
+                const foundSkin = CosmeticShop.skins.find(s => {
+                    if (s.name.startsWith('decent_duck')) {
+                        const match = s.label.match(/#(\d+)/);
+                        return match && match[1] === suffix;
+                    }
+                    return false;
+                });
+                if (foundSkin) {
+                    targetSkinName = foundSkin.name;
+                }
+            }
+            
+            if (targetSkinName === skinName) {
+                if (!CosmeticShop.unlockedSkins.includes(skinName)) {
+                    CosmeticShop.unlockedSkins.push(skinName);
+                    CosmeticShop.saveData();
+                    populateSkinsGrid('decent');
+                    
+                    const skinLabel = CosmeticShop.skins.find(s => s.name === skinName).label;
+                    alert(`UNLOCKED: ${skinLabel}!`);
+                    return true;
+                } else {
+                    alert('ALREADY UNLOCKED!');
+                    return true;
+                }
+            } else {
+                alert('INCORRECT PASSCODE FOR THIS SPECIFIC SKIN');
+                return false;
+            }
+        }
 
         // --- CLICK BURST MECHANIC ---
         document.getElementById('game-container').addEventListener('pointerdown', (e) => {
