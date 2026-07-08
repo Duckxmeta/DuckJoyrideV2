@@ -1061,6 +1061,54 @@
             scene.textures.addCanvas(key, canvas);
         }
 
+        function createFeatherParticleTexture(scene, key, size, color) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, size, size);
+            
+            const cx = size / 2;
+            const cy = size / 2;
+            
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Math.PI / 4); // Draw at an angle
+            
+            // Quill (shaft)
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(0, -size / 2 + 2);
+            ctx.lineTo(0, size / 2 - 2);
+            ctx.stroke();
+            
+            // Barbs (vanes)
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.6;
+            
+            // Left side barbs
+            for (let y = -size / 2 + 4; y < size / 2 - 4; y += 2) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.quadraticCurveTo(-size / 3, y - 2, -size / 4, y + 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Right side barbs
+            for (let y = -size / 2 + 4; y < size / 2 - 4; y += 2) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.quadraticCurveTo(size / 3, y - 2, size / 4, y + 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            ctx.restore();
+            scene.textures.addCanvas(key, canvas);
+        }
+
         function createParallaxMidgroundTexture(scene, key, width, height) {
             const canvas = document.createElement('canvas');
             canvas.width = width;
@@ -1315,6 +1363,12 @@
                 createNeonParticleTexture(this, 'shield_particle', 20, '#00f2fe'); 
                 createNeonParticleTexture(this, 'obstacle_particle', 20, '#ff007f'); 
 
+                // Create procedural feather textures for the universal feather jetpack trail
+                createFeatherParticleTexture(this, 'feather_smoke', 20, '#e5e7eb');
+                createFeatherParticleTexture(this, 'feather_fire', 20, '#ff5e00');
+                createFeatherParticleTexture(this, 'feather_rainbow', 20, '#ffffff');
+                createFeatherParticleTexture(this, 'feather_matrix', 20, '#00ff00');
+
                 createParallaxMidgroundTexture(this, 'midground_city', 720, this.game.config.height);
                 
                 // Procedural zapper + missile + scientist shapes
@@ -1502,60 +1556,64 @@
                 }
 
                 const trailType = CosmeticShop.equippedTrail || 'smoke';
-                let particleKey = 'smoke_particle';
+                let particleKey = 'feather_smoke';
                 let emitterConfig = {};
 
                 if (trailType === 'smoke') {
-                    particleKey = 'smoke_particle';
+                    particleKey = 'feather_smoke';
                     emitterConfig = {
-                        speedY: { min: -10, max: 40 },
-                        speedX: { min: -140, max: -40 },
-                        angle: { min: 165, max: 195 },
-                        scale: { start: 0.9, end: 0.1 },
-                        alpha: { start: 0.7, end: 0 },
-                        lifespan: 500,
+                        speedY: { min: -30, max: 30 },
+                        speedX: { min: -120, max: -40 },
+                        angle: { min: 150, max: 210 },
+                        scale: { start: 0.8, end: 0.2 },
+                        alpha: { start: 1.0, end: 0 },
+                        lifespan: 800,
                         frequency: -1, 
-                        gravityY: 60,
+                        gravityY: 15,
+                        rotate: { min: -45, max: 45 },
                         blendMode: 'NORMAL'
                     };
                 } else if (trailType === 'fire') {
-                    particleKey = 'fire_particle';
+                    particleKey = 'feather_fire';
                     emitterConfig = {
-                        speedY: { min: -20, max: 60 },
-                        speedX: { min: -180, max: -60 },
-                        angle: { min: 160, max: 200 },
-                        scale: { start: 1.0, end: 0.1 },
-                        alpha: { start: 0.9, end: 0 },
-                        lifespan: 400,
+                        speedY: { min: -40, max: 40 },
+                        speedX: { min: -160, max: -60 },
+                        angle: { min: 140, max: 220 },
+                        scale: { start: 1.0, end: 0.25 },
+                        alpha: { start: 1.0, end: 0 },
+                        lifespan: 700,
                         frequency: -1,
-                        gravityY: 100,
+                        gravityY: 25,
+                        rotate: { min: -90, max: 90 },
                         blendMode: 'ADD'
                     };
                 } else if (trailType === 'rainbow') {
-                    particleKey = 'rainbow_particle';
+                    particleKey = 'feather_rainbow';
                     emitterConfig = {
-                        speedY: { min: -15, max: 45 },
-                        speedX: { min: -150, max: -50 },
-                        angle: { min: 165, max: 195 },
-                        scale: { start: 0.8, end: 0.15 },
-                        alpha: { start: 0.8, end: 0 },
-                        lifespan: 550,
+                        speedY: { min: -35, max: 35 },
+                        speedX: { min: -130, max: -50 },
+                        angle: { min: 145, max: 215 },
+                        scale: { start: 0.9, end: 0.2 },
+                        alpha: { start: 0.9, end: 0 },
+                        lifespan: 800,
                         frequency: -1,
-                        gravityY: 40,
+                        gravityY: 15,
+                        rotate: { min: -60, max: 60 },
                         blendMode: 'ADD',
                         tint: [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x8b00ff]
                     };
                 } else if (trailType === 'matrix') {
-                    particleKey = 'matrix_particle';
+                    particleKey = 'feather_matrix';
                     emitterConfig = {
-                        speedY: { min: 10, max: 50 },
-                        speedX: { min: -120, max: -30 },
-                        angle: { min: 170, max: 210 },
-                        scale: { start: 0.9, end: 0.3 },
+                        speedY: { min: -20, max: 50 },
+                        speedX: { min: -110, max: -30 },
+                        angle: { min: 160, max: 220 },
+                        scale: { start: 0.85, end: 0.3 },
                         alpha: { start: 1.0, end: 0 },
-                        lifespan: 700,
+                        lifespan: 900,
                         frequency: -1,
-                        gravityY: 120,
+                        gravityY: 30,
+                        rotate: { min: -30, max: 30 },
                         blendMode: 'ADD'
                     };
                 }
@@ -1719,10 +1777,8 @@
                 if (isFlapping) {
                     this.player.body.setVelocityY(-400); // Original snappy lift velocity
                     
-                    // Emit flight bubble particles
-                    if (this.player.body.velocity.y < 0) {
-                        this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
-                    }
+                    // Emit flight feather particles (spawn continuously when flying/thrusting)
+                    this.jetpackEmitter.emitParticleAt(this.player.x - 14, this.player.y + 6);
                 } else {
                     this.jetpackEmitter.stop();
                 }
