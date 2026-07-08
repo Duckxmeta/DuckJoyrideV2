@@ -480,6 +480,11 @@
             color: #00ff00;
             text-shadow: 0 0 5px #00ff00;
         }
+        .trail-thumb-sync {
+            background: linear-gradient(135deg, #00f2fe 0%, #ff007f 50%, #ffd700 100%);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
 
         /* HUD Overlay Styling */
         #hud-overlay {
@@ -849,10 +854,11 @@
             ],
             
             trails: [
-                { name: 'smoke', label: 'Standard Smoke', price: 0, desc: 'Simple grey exhaust bubbles.' },
-                { name: 'fire', label: 'Neon Fire', price: 300, desc: 'High-intensity magenta flame.' },
-                { name: 'rainbow', label: 'Rainbow Trail', price: 700, desc: 'Flowing spectrum of neon colors.' },
-                { name: 'matrix', label: 'Web3 Matrix Glow', price: 1500, desc: 'Cascading green binary data stream.' }
+                { name: 'smoke', label: 'Standard White', price: 0, desc: 'Clean white feather jetpack exhaust.' },
+                { name: 'fire', label: 'Neon Fire', price: 300, desc: 'High-intensity magenta flame feathers.' },
+                { name: 'rainbow', label: 'Rainbow Trail', price: 700, desc: 'Flowing spectrum of neon feathers.' },
+                { name: 'matrix', label: 'Web3 Matrix Glow', price: 1500, desc: 'Cascading green binary matrix feathers.' },
+                { name: 'sync', label: 'Skin Color Match', price: 500, desc: 'Feathers that match your equipped skin palette.' }
             ],
             
             loadData() {
@@ -955,6 +961,29 @@
 
         function scaleFactor(scene) {
             return Math.min(scene.game.config.width / 360, scene.game.config.height / 640);
+        }
+
+        function getSkinColor(skin) {
+            if (skin === 'golden_duck') return '#ffd700';
+            if (skin === 'cyber_duck') return '#ff007f'; // neon magenta
+            if (skin === 'rainbow_duck') return '#ffffff'; // rainbow handles white core + tint cycle
+            if (skin === 'fire_duck') return '#ff4500'; // red-orange
+            if (skin === 'ice_duck') return '#00f2fe'; // cyan
+            if (skin === 'toxic_duck') return '#39ff14'; // neon green
+            if (skin.startsWith('decent_duck')) {
+                const colors = [
+                    '#00f2fe', '#ff007f', '#ffd700', '#39ff14', 
+                    '#8a2be2', '#ff4500', '#1e90ff', '#ff1493',
+                    '#00ffff', '#adff2f'
+                ];
+                let hash = 0;
+                for (let i = 0; i < skin.length; i++) {
+                    hash = skin.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const index = Math.abs(hash) % colors.length;
+                return colors[index];
+            }
+            return '#ffffff'; // Default baseline white feathers
         }
 
         // --- PROCEDURAL GENERATORS (Canvas Textures) ---
@@ -1364,7 +1393,7 @@
                 createNeonParticleTexture(this, 'obstacle_particle', 20, '#ff007f'); 
 
                 // Create procedural feather textures for the universal feather jetpack trail
-                createFeatherParticleTexture(this, 'feather_smoke', 20, '#e5e7eb');
+                createFeatherParticleTexture(this, 'feather_smoke', 20, '#ffffff');
                 createFeatherParticleTexture(this, 'feather_fire', 20, '#ff5e00');
                 createFeatherParticleTexture(this, 'feather_rainbow', 20, '#ffffff');
                 createFeatherParticleTexture(this, 'feather_matrix', 20, '#00ff00');
@@ -1616,6 +1645,31 @@
                         rotate: { min: -30, max: 30 },
                         blendMode: 'ADD'
                     };
+                } else if (trailType === 'sync') {
+                    const skinName = CosmeticShop.equippedSkin || 'duck';
+                    const textureKey = 'feather_sync_' + skinName;
+                    
+                    if (!this.textures.exists(textureKey)) {
+                        const color = getSkinColor(skinName);
+                        createFeatherParticleTexture(this, textureKey, 20, color);
+                    }
+                    
+                    particleKey = textureKey;
+                    emitterConfig = {
+                        speedY: { min: -35, max: 35 },
+                        speedX: { min: -130, max: -50 },
+                        angle: { min: 145, max: 215 },
+                        scale: { start: 0.9, end: 0.2 },
+                        alpha: { start: 1.0, end: 0 },
+                        lifespan: 800,
+                        frequency: -1,
+                        gravityY: 15,
+                        rotate: { min: -60, max: 60 },
+                        blendMode: skinName === 'rainbow_duck' ? 'ADD' : 'NORMAL'
+                    };
+                    if (skinName === 'rainbow_duck') {
+                        emitterConfig.tint = [0xff0000, 0xff7f00, 0xffff00, 0x00ff00, 0x0000ff, 0x4b0082, 0x8b00ff];
+                    }
                 }
 
                 this.trailParticles = this.add.particles(particleKey).setDepth(5);
@@ -2323,6 +2377,9 @@
                         const gameScene = game.scene.keys.GameScene;
                         if (gameScene) {
                             gameScene.updatePlayerSkin();
+                            if (CosmeticShop.equippedTrail === 'sync') {
+                                gameScene.updateJetpackTrail();
+                            }
                         }
                     });
                 }
@@ -2375,6 +2432,9 @@
                                 const gameScene = game.scene.keys.GameScene;
                                 if (gameScene) {
                                     gameScene.updatePlayerSkin();
+                                    if (CosmeticShop.equippedTrail === 'sync') {
+                                        gameScene.updateJetpackTrail();
+                                    }
                                 }
                             });
                         } else {
